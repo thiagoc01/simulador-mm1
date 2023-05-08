@@ -1,4 +1,4 @@
-#include "requisicao.hpp"
+#include "simulador3/requisicao.hpp"
 
 Requisicao::Requisicao(double tempoChegada, double tempoServico, double tempoChegadaAcumulativo,
             double tempoInicioServico,

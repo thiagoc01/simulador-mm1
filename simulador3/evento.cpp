@@ -1,4 +1,4 @@
-#include "evento.hpp"
+#include "simulador3/evento.hpp"
 
 Evento::Evento(double tempoEvento, int numeroElementosFila, int numeroElementosSistema,
                 const std::string& tipoEvento, double ultimoInicio)

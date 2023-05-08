@@ -1,6 +1,6 @@
 #include "geracao_tempos.hpp"
 
-#include "simulador_mm1_prob.hpp"
+#include "simulador3/simulador3_mm1.hpp"
 
 #include <queue>
 #include <limits>
@@ -21,11 +21,11 @@ double calculaMedia(const std::vector<double>& v)
 
 void calculaMetricas(const std::vector<Requisicao>& requisicoes, const std::vector<Evento>& eventos)
 {
-    double mediaChegadasSimulada = calculaMedia(retornaTemposEspecifico(requisicoes, &Requisicao::retornaTempoChegada));
-    double taxaMediaChegadasSimulada  = 1.0 / mediaChegadasSimulada;
+    double taxaMediaChegadasSimulada = calculaMedia(retornaTemposEspecifico(requisicoes, &Requisicao::retornaTempoChegada));
+    double mediaChegadasSimulada  = 1.0 / taxaMediaChegadasSimulada;
 
-    double mediaServicosSimulada = calculaMedia(retornaTemposEspecifico(requisicoes, &Requisicao::retornaTempoServico));
-    double taxaMediaServicosSimulada = 1.0 / mediaServicosSimulada;
+    double taxaMediaServicosSimulada = calculaMedia(retornaTemposEspecifico(requisicoes, &Requisicao::retornaTempoServico));
+    double mediaServicosSimulada = 1.0 / taxaMediaServicosSimulada;
 
     double mediaTempoEsperaSimulada = calculaMedia(retornaTemposEspecifico(requisicoes, &Requisicao::retornaTempoFila));
 
@@ -36,7 +36,7 @@ void calculaMetricas(const std::vector<Requisicao>& requisicoes, const std::vect
     std::cout << "Média tempos de espera : " << mediaTempoEsperaSimulada << std::endl;
     std::cout << "Média tempos de resposta : " << mediaTempoRespostaSimulada << std::endl;
     std::cout << "Média número de processos no sistema : " << taxaMediaChegadasSimulada * mediaTempoRespostaSimulada << std::endl;
-    std::cout << "Média número de processos na fila : " << taxaMediaChegadasSimulada * mediaTempoEsperaSimulada << std::endl;
+    std::cout << "Média número de processos na fila : " << taxaMediaServicosSimulada * mediaTempoEsperaSimulada << std::endl;
 }
 
 double retornaTempoAtendimentoSistema(const std::vector<Requisicao>& requisicoes)
@@ -186,8 +186,8 @@ std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisi
 void iniciaSimulacao(const std::unordered_map<std::string, double>& parametros)
 {
     int n = static_cast<int>(parametros.find("n")->second);
-    double taxaMediaChegada = parametros.find("mediaChegada")->second;
-    double taxaServico = parametros.find("servico")->second;
+    double taxaMediaChegada = parametros.find("taxaMediaChegada")->second;
+    double taxaServico = parametros.find("taxaServico")->second;
 
     std::vector<Requisicao> requisicoes = geraTemposEventos(n, taxaMediaChegada, taxaServico);
     std::vector<Evento> eventos = geraEventosSimulador(n, requisicoes);
@@ -206,6 +206,8 @@ void simulaFilaProbabilisticaMM1(int numIteracoes, double mediaChegada, double m
     parametros.insert({"n", numIteracoes });
     parametros.insert({"mediaChegada", mediaChegada});
     parametros.insert({"servico", mediaServico});
+    parametros.insert({"taxaMediaChegada", 1.0 / mediaChegada});
+    parametros.insert({"taxaServico", 1.0 / mediaServico});
 
     iniciaSimulacao(parametros);
 }
