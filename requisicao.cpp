@@ -15,37 +15,37 @@ Requisicao::Requisicao(double tempoChegada, double tempoServico, double tempoChe
     this->tempoFila = tempoFila;
 }
 
-double Requisicao::retornaTempoChegada()
+double Requisicao::retornaTempoChegada() const
 {
     return this->tempoChegada;
 }
 
-double Requisicao::retornaTempoServico()
+double Requisicao::retornaTempoServico() const
 {
     return this->tempoServico;
 }
 
-double Requisicao::retornaTempoChegadaAcumulativo()
+double Requisicao::retornaTempoChegadaAcumulativo() const
 {
     return this->tempoChegadaAcumulativo;
 }
 
-double Requisicao::retornaTempoInicioServico()
+double Requisicao::retornaTempoInicioServico() const
 {
     return this->tempoInicioServico;
 }
 
-double Requisicao::retornaTempoSaidaSistema()
+double Requisicao::retornaTempoSaidaSistema() const
 {
     return this->tempoSaidaSistema;
 }
 
-double Requisicao::retornaTempoSistema()
+double Requisicao::retornaTempoSistema() const
 {
     return this->tempoSistema;
 }
 
-double Requisicao::retornaTempoFila()
+double Requisicao::retornaTempoFila() const
 {
     return this->tempoFila;
 }

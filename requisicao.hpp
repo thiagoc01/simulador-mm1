@@ -21,19 +21,19 @@ class Requisicao
             double tempoSistema,
             double tempoFila);
 
-        double retornaTempoChegada();
+        double retornaTempoChegada() const;
 
-        double retornaTempoServico();
+        double retornaTempoServico() const;
 
-        double retornaTempoChegadaAcumulativo();
+        double retornaTempoChegadaAcumulativo() const;
 
-        double retornaTempoInicioServico();
+        double retornaTempoInicioServico() const;
 
-        double retornaTempoSaidaSistema();
+        double retornaTempoSaidaSistema() const;
 
-        double retornaTempoSistema();
+        double retornaTempoSistema() const;
 
-        double retornaTempoFila();
+        double retornaTempoFila() const;
 };
 
 #endif

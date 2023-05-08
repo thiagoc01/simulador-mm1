@@ -1,7 +1,6 @@
 #include "geracao_tempos.hpp"
 
-//static std::random_device aleatorio("40");
-static std::mt19937 aleatorio(42);
+static std::random_device aleatorio;
 
 double retornaTempoPoisson(const double& lambda)
 {

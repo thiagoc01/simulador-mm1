@@ -10,19 +10,22 @@ class Evento
         double tempoEvento;
         int numeroElementosFila;
         int numeroElementosSistema;
+        double ultimoInicio;
         std::string tipoEvento;
 
     public:
 
-        Evento(double tempoEvento, int numeroElementosFila, int numeroElementosSistema, const std::string& tipoEvento);
+        Evento(double tempoEvento, int numeroElementosFila, int numeroElementosSistema, const std::string& tipoEvento, double ultimoInicio);
 
-        double retornaTempoEvento();
+        double retornaTempoEvento() const;
 
-        int retornaNumeroElementosFila();
+        int retornaNumeroElementosFila() const;
 
-        int retornaNumeroElementosSistema();
+        int retornaNumeroElementosSistema() const;
 
-        std::string retornaTipoEvento();
+        double retornaUltimoInicio() const;
+
+        std::string retornaTipoEvento() const;
 };
 
 #endif

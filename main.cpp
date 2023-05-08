@@ -1,8 +1,8 @@
 #include "simulador_mm1_prob.hpp"
 
-int main()
+int main(int argc, char** argv)
 {
-    simulaFilaProbabilisticaMM1(200, 16, 15);
+    simulaFilaProbabilisticaMM1(std::atoi(argv[1]), std::atof(argv[2]), std::atof(argv[3]));
 
     return 0;
 }
