@@ -1,22 +1,28 @@
-#ifndef REQUISICAO2_HPP
-#define REQUISICAO2_HPP
+#ifndef REQUISICAO_HPP
+#define REQUISICAO_HPP
 
 #include <string>
+
+enum TIPO_CHEGADA
+{
+    CHEGADA,
+    SAIDA
+};
 
 class Requisicao
 {
     private:
 
         double tempoRequisicao;
-        std::string tipo;
+        TIPO_CHEGADA tipo;
 
     public:
 
-        Requisicao(double tempoRequisicao, const std::string& tipo);
+        Requisicao(double tempoRequisicao, const TIPO_CHEGADA tipo);
 
         double retornaTempoRequisicao() const;
 
-        std::string retornaTipoRequisicao() const;
+        TIPO_CHEGADA retornaTipoRequisicao() const;
 };
 
 #endif

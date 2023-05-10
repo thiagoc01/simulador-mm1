@@ -1,4 +1,6 @@
-#include "simulador1/simulador1_mm1.hpp"
+#include "simulador2/simulador2_mm1.hpp"
+
+#include <iostream>
 
 int main(int argc, char** argv)
 {
@@ -8,7 +10,7 @@ int main(int argc, char** argv)
         exit(1);
     }
 
-    simulaFilaProbabilisticaMM1(std::atoi(argv[1]), std::atof(argv[2]), std::atof(argv[3]));
+    simulaFilaMM1Probabilistica(std::atoi(argv[1]), std::atof(argv[2]), std::atof(argv[3]));
 
     return 0;
 }

@@ -1,8 +1,8 @@
 CXX = g++
 INCLUDEDIR = includes/
-FLAGS = -I $(INCLUDEDIR)
+FLAGS = -I $(INCLUDEDIR) -g
 OBJ1 = simulador1_mm1.o geracao_tempos.o
-OBJ2 = simulador2.mm1.o
+OBJ2 = simulador2_mm1.o requisicao.o geracao_tempos.o
 OBJ3 = simulador3_mm1.o evento.o requisicao.o geracao_tempos.o
 TARGET = simulador
 
@@ -14,6 +14,16 @@ simulador1_compilacao: simulador1/main.cpp
 simulador1_compilacao_objs: simulador1/*.cpp geradores_aleatorios/geracao_tempos.cpp
 	$(CXX) -c simulador1/simulador1_mm1.cpp $(FLAGS)
 	$(CXX) -c geradores_aleatorios/geracao_tempos.cpp $(FLAGS)
+
+simulador2 : simulador2_compilacao_objs simulador2_compilacao clean
+	
+simulador2_compilacao: simulador2/main.cpp
+	$(CXX) $(OBJ2) simulador2/main.cpp -o $(TARGET) $(FLAGS)
+
+simulador2_compilacao_objs: simulador2/*.cpp geradores_aleatorios/geracao_tempos.cpp
+	$(CXX) -c simulador2/simulador2_mm1.cpp $(FLAGS)
+	$(CXX) -c simulador2/requisicao.cpp $(FLAGS)
+	$(CXX) -c geradores_aleatorios/geracao_tempos.cpp $(FLAGS)	
 
 simulador3 : simulador3_compilacao_objs simulador3_compilacao clean
 	
