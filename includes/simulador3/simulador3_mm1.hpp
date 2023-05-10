@@ -21,6 +21,8 @@ std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisi
 template <typename T, typename U>
 std::vector<U> retornaTemposEspecifico(const std::vector<T>& v, U (T::*retornaTempo)() const);
 
+std::vector<double> retornaTemposEspecifico(const std::vector<Evento>& v, int (Evento::*retornaTempo)() const);
+
 void iniciaSimulacao(const std::unordered_map<std::string, double>& parametros);
 
 void simulaFilaProbabilisticaMM1(int numIteracoes, double mediaChegada, double mediaServico);

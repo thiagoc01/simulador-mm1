@@ -8,6 +8,7 @@ class Evento
     private:
     
         double tempoEvento;
+        double delayUltimoEvento;
         int numeroElementosFila;
         int numeroElementosSistema;
         double ultimoInicio;
@@ -15,9 +16,11 @@ class Evento
 
     public:
 
-        Evento(double tempoEvento, int numeroElementosFila, int numeroElementosSistema, const std::string& tipoEvento, double ultimoInicio);
+        Evento(double tempoEvento, double delayUltimoEvento, int numeroElementosFila, int numeroElementosSistema, const std::string& tipoEvento, double ultimoInicio);
 
         double retornaTempoEvento() const;
+
+        double retornaDelayUltimoEvento() const;
 
         int retornaNumeroElementosFila() const;
 
