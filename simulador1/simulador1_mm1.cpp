@@ -75,7 +75,7 @@ void calculaMetricas()
     else
         tempoSistemaEsperaMedia = std::accumulate(temposEspera.begin(), temposEspera.end(), 0.0) / temposEspera.size();
 
-    std::cout << " Número médio de processos no sistema (E(N)): " << numProcessosSistemaTotal / tempoSimulacao << std::endl;
+    std::cout << "\n\nNúmero médio de processos no sistema (E(N)): " << numProcessosSistemaTotal / tempoSimulacao << std::endl;
     std::cout << "Número médio de processos na fila (E(N_q)): " << numProcessosFilaTotal / tempoSimulacao << std::endl;
     std::cout << "Tempo médio no sistema (E(T)): " <<  tempoSistemaRespostaMedia << std::endl;
     std::cout << "Tempo médio na fila (E(W)): " <<  tempoSistemaEsperaMedia << std::endl;
@@ -121,6 +121,7 @@ void atualizaSistema(const double& tempoChegada, const double& tempoSaida)
         temposSaida.push_back(tempoSaida);
         temposSistema.push_back(tempoSimulacao - temposChegadaAcumulativo[temposSaida.size() - 1]);
 
+        numerosProcessosFilaPeriodo.push_back({tempoSaida, numProcessosFila}); // Durante o serviço ocorreu a quantidade anterior menos um.
         numerosProcessosSistemaPeriodo.push_back({tempoSimulacao - ultimoEvento, numProcessosSistema});
         
         ultimoEvento = tempoSimulacao;
