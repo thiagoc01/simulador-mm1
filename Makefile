@@ -1,6 +1,6 @@
 CXX = g++
 INCLUDEDIR = includes/
-FLAGS = -I $(INCLUDEDIR)
+FLAGS = -I $(INCLUDEDIR) -std=c++2a
 OBJ1 = simulador1_mm1.o geracao_tempos.o
 OBJ2 = simulador2.mm1.o
 OBJ3 = simulador3_mm1.o evento.o requisicao.o geracao_tempos.o

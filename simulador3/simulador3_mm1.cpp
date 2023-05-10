@@ -143,12 +143,13 @@ std::vector<U> retornaTemposEspecifico(const std::vector<T>& v, U (T::*retornaTe
     return tempos;
 }
 
-std::vector<double> retornaTemposEspecifico(const std::vector<Evento>& v, int (Evento::*retornaTempo)() const)
+template <typename T, typename U, eInteiro<T, U> V>
+std::vector<U> retornaTemposEspecifico(const std::vector<T>& v, V (T::*retornaTempo)() const)
 {
-    std::vector<double> tempos;
+    std::vector<U> tempos;
 
     for (const auto& e: v)
-        tempos.push_back((const_cast<Evento &>(e).*retornaTempo)());
+        tempos.push_back((const_cast<T &>(e).*retornaTempo)());
 
     return tempos;
 }
