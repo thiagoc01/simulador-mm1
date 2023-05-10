@@ -1,9 +1,10 @@
 #include "simulador3/evento.hpp"
 
-Evento::Evento(double tempoEvento, int numeroElementosFila, int numeroElementosSistema,
+Evento::Evento(double tempoEvento, double delayUltimoEvento, int numeroElementosFila, int numeroElementosSistema,
                 const std::string& tipoEvento, double ultimoInicio)
 {
     this->tempoEvento = tempoEvento;
+    this->delayUltimoEvento = delayUltimoEvento;
     this->numeroElementosFila = numeroElementosFila;
     this->numeroElementosSistema = numeroElementosSistema;
     this->tipoEvento = tipoEvento;
@@ -13,6 +14,11 @@ Evento::Evento(double tempoEvento, int numeroElementosFila, int numeroElementosS
 double Evento::retornaTempoEvento() const
 {
     return this->tempoEvento;
+}
+
+double Evento::retornaDelayUltimoEvento() const
+{
+    return this->delayUltimoEvento;
 }
 
 int Evento::retornaNumeroElementosFila() const

@@ -19,6 +19,19 @@ double calculaMedia(const std::vector<double>& v)
     return std::accumulate(v.begin(), v.end(), 0.0) / v.size();    
 }
 
+double calculaMedia2(const std::vector<double>& v, const std::vector<double>& u, double durTotal)
+{
+    double soma = 0.0;
+
+    if (v.empty())
+        return 0.0;
+
+    for (int i = 0 ; i < v.size() ; i++)
+        soma += (v[i] * u[i]);
+
+    return soma / durTotal;
+}
+
 void calculaMetricas(const std::vector<Requisicao>& requisicoes, const std::vector<Evento>& eventos)
 {
     double taxaMediaChegadasSimulada = calculaMedia(retornaTemposEspecifico(requisicoes, &Requisicao::retornaTempoChegada));
@@ -28,21 +41,28 @@ void calculaMetricas(const std::vector<Requisicao>& requisicoes, const std::vect
     double mediaServicosSimulada = 1.0 / taxaMediaServicosSimulada;
 
     double mediaTempoEsperaSimulada = calculaMedia(retornaTemposEspecifico(requisicoes, &Requisicao::retornaTempoFila));
-
+    double durTotal = retornaTempoAtendimentoSistema(requisicoes);
     double mediaTempoRespostaSimulada = calculaMedia(retornaTemposEspecifico(requisicoes, &Requisicao::retornaTempoSistema));
     
-    std::cout << "Média tempos de chegada/taxa : " << mediaChegadasSimulada << " " << taxaMediaChegadasSimulada << std::endl;
-    std::cout << "Média tempos de serviços/taxa : " << mediaServicosSimulada << " " << taxaMediaServicosSimulada << std::endl;
-    std::cout << "Média tempos de espera : " << mediaTempoEsperaSimulada << std::endl;
-    std::cout << "Média tempos de resposta : " << mediaTempoRespostaSimulada << std::endl;
-    std::cout << "Média número de processos no sistema : " << taxaMediaChegadasSimulada * mediaTempoRespostaSimulada << std::endl;
-    std::cout << "Média número de processos na fila : " << taxaMediaServicosSimulada * mediaTempoEsperaSimulada << std::endl;
+    std::cout << "Média tempos de chegada/taxa (Lambda e 1/Lambda): " << mediaChegadasSimulada << " " << taxaMediaChegadasSimulada << std::endl;
+    std::cout << "Média tempos de serviços/taxa (Mi e 1/Mi): " << mediaServicosSimulada << " " << taxaMediaServicosSimulada << std::endl;
+    std::cout << "Média tempos de espera (E(W)): " << mediaTempoEsperaSimulada << std::endl;
+    std::cout << "Média tempos de resposta (E(T)): " << mediaTempoRespostaSimulada << std::endl;
+    std::cout << "Média número de processos no sistema (E(N)) : " << calculaMedia2(retornaTemposEspecifico(eventos, &Evento::retornaNumeroElementosSistema),
+                                                            retornaTemposEspecifico(eventos, &Evento::retornaDelayUltimoEvento), durTotal) << std::endl;
+
+    std::cout << "Média número de processos no sistema (E(N)) (Lei de Little): " << mediaChegadasSimulada * mediaTempoRespostaSimulada << std::endl;
+
+    std::cout << "Média número de processos na fila (E(N_q)): " << calculaMedia2(retornaTemposEspecifico(eventos, &Evento::retornaNumeroElementosFila), 
+                                            retornaTemposEspecifico(eventos, &Evento::retornaDelayUltimoEvento), durTotal) << std::endl;
+
+    std::cout << "Média número de processos na fila (E(N_q)) (Lei de Little): " << mediaChegadasSimulada * mediaTempoEsperaSimulada << std::endl;
 }
 
 double retornaTempoAtendimentoSistema(const std::vector<Requisicao>& requisicoes)
 {
     double ultimoTempoSaida = requisicoes.at(requisicoes.size() - 1).retornaTempoSaidaSistema();
-    double primeiroTempoChegada = requisicoes.at(0).retornaTempoSaidaSistema();
+    double primeiroTempoChegada = requisicoes.at(0).retornaTempoChegadaAcumulativo();
 
     return ultimoTempoSaida - primeiroTempoChegada;
 }
@@ -107,6 +127,16 @@ std::vector<U> retornaTemposEspecifico(const std::vector<T>& v, U (T::*retornaTe
     return tempos;
 }
 
+std::vector<double> retornaTemposEspecifico(const std::vector<Evento>& v, int (Evento::*retornaTempo)() const)
+{
+    std::vector<double> tempos;
+
+    for (const auto& e: v)
+        tempos.push_back((const_cast<Evento &>(e).*retornaTempo)());
+
+    return tempos;
+}
+
 double retornaTempoEspecifico(const std::vector<double>& tempos, const int& indice, const int& n)
 {
     if (indice < n)
@@ -124,6 +154,8 @@ std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisi
     std::vector<double> temposSaida = retornaTemposEspecifico(requisicoes, &Requisicao::retornaTempoSaidaSistema);
 
     double tempoEvento = 0.0;
+    double delayUltimoEvento = 0.0;
+    double ultimoEvento = 0.0;
     int numeroElementosFila = 0;
     int numeroElementosSistema = 0;
     int temposChegadaIndice = 0, temposInicioIndice = 0, temposSaidaIndice = 0;
@@ -140,11 +172,12 @@ std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisi
         if (tempoChegadaAtual <= tempoInicioAtual && tempoChegadaAtual <= tempoSaidaAtual)
         {
             tempoEvento = tempoChegadaAtual;
+            delayUltimoEvento = tempoEvento - ultimoEvento;
             mudancaElementosSistema = mudancaElementosFila = 1;
             tipoEvento = "CHEGADA";
             temposChegadaIndice++;
 
-            Evento novo = Evento(tempoEvento, numeroElementosFila, numeroElementosSistema, tipoEvento, 0.0);
+            Evento novo = Evento(tempoEvento, delayUltimoEvento, numeroElementosFila, numeroElementosSistema, tipoEvento, 0.0);
 
             adicionaEntradaVetor(ret, novo);
         }
@@ -152,12 +185,13 @@ std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisi
         else if (tempoSaidaAtual <= tempoChegadaAtual  && tempoSaidaAtual <= tempoInicioAtual)
         {
             tempoEvento = tempoSaidaAtual;
+            delayUltimoEvento = tempoEvento - ultimoEvento;
             mudancaElementosSistema = -1;
             mudancaElementosFila = 0;
             tipoEvento = "SAÍDA";
             temposSaidaIndice++;
 
-            Evento novo = Evento(tempoEvento, numeroElementosFila, numeroElementosSistema, tipoEvento, ultimoInicio);
+            Evento novo = Evento(tempoEvento, delayUltimoEvento, numeroElementosFila, numeroElementosSistema, tipoEvento, ultimoInicio);
 
             adicionaEntradaVetor(ret, novo);           
         }
@@ -165,19 +199,22 @@ std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisi
         else
         {
             tempoEvento = tempoInicioAtual;
+            delayUltimoEvento = tempoEvento - ultimoEvento;
             mudancaElementosSistema = 0;
             mudancaElementosFila = -1;
             tipoEvento = "INÍCIO";
             ultimoInicio = tempoEvento;
             temposInicioIndice++;
 
-            Evento novo = Evento(tempoEvento, numeroElementosFila, numeroElementosSistema, tipoEvento, 0.0);
+            Evento novo = Evento(tempoEvento, delayUltimoEvento, numeroElementosFila, numeroElementosSistema, tipoEvento, 0.0);
 
             adicionaEntradaVetor(ret, novo);
         }
 
         numeroElementosSistema += mudancaElementosSistema;
         numeroElementosFila += mudancaElementosFila;
+
+        ultimoEvento = tempoEvento;
     }
 
     return ret;
