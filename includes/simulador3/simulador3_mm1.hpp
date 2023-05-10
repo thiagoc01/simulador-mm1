@@ -14,9 +14,9 @@ void adicionaEntradaVetor(std::vector<T>& v, T entrada);
 
 double retornaTempoAtendimentoSistema(const std::vector<Requisicao>& requisicoes);
 
-std::vector<Requisicao> geraTemposEventos(const int& n, const double& lambda, const double& beta);
+std::vector<Requisicao> geraTemposEventos(const int& n, const double& lambda, const double& beta, const bool& eDeterministic);
 
-std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisicao>& requisicoes);
+std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisicao>& requisicoeso);
 
 template <typename T, typename U>
 std::vector<U> retornaTemposEspecifico(const std::vector<T>& v, U (T::*retornaTempo)() const);
@@ -25,6 +25,6 @@ std::vector<double> retornaTemposEspecifico(const std::vector<Evento>& v, int (E
 
 void iniciaSimulacao(const std::unordered_map<std::string, double>& parametros);
 
-void simulaFilaProbabilisticaMM1(int numIteracoes, double mediaChegada, double mediaServico);
+void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, bool eDeterministico);
 
 #endif
