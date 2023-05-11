@@ -155,16 +155,6 @@ std::vector<U> retornaTemposEspecifico(const std::vector<T>& v, U (T::*retornaTe
     return tempos;
 }
 
-/*std::vector<double> retornaTemposEspecifico(const std::vector<Evento>& v, int (Evento::*retornaTempo)() const)
-{
-    std::vector<double> tempos;
-
-    for (const auto& e: v)
-        tempos.push_back((const_cast<Evento &>(e).*retornaTempo)());
-
-    return tempos;
-}*/
-
 double retornaTempoEspecifico(const std::vector<double>& tempos, const int& indice, const int& n)
 {
     if (indice < n)

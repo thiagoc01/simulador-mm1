@@ -7,6 +7,8 @@ enum TIPO_REQUISICAO
     SAIDA
 };
 
+/* Guarda os dados para uma requisição que fica na fila do simulador 2. */
+
 class Requisicao
 {
     private:
