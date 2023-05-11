@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <concepts>
 
 #include "requisicao.hpp"
 #include "evento.hpp"
@@ -18,10 +19,11 @@ std::vector<Requisicao> geraTemposEventos(const int& n, const double& lambda, co
 
 std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisicao>& requisicoes);
 
+template <typename T, typename V> requires std::is_integral_v<V>
+std::vector<double> retornaTemposEspecifico(const std::vector<T>& v, V (T::*retornaTempo)() const);
+
 template <typename T, typename U>
 std::vector<U> retornaTemposEspecifico(const std::vector<T>& v, U (T::*retornaTempo)() const);
-
-std::vector<double> retornaTemposEspecifico(const std::vector<Evento>& v, int (Evento::*retornaTempo)() const);
 
 void iniciaSimulacao(const std::unordered_map<std::string, double>& parametros);
 

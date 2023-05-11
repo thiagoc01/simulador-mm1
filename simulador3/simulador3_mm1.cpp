@@ -132,6 +132,18 @@ std::vector<Requisicao> geraTemposEventos(const int& n, const double& lambda, co
     return ret;
 }
 
+template <typename T, typename V> requires std::is_integral_v<V>
+std::vector<double> retornaTemposEspecifico(const std::vector<T>& v, V (T::*retornaTempo)() const)
+{
+    std::vector<double> tempos;
+
+    for (const auto& e: v)
+        tempos.push_back((const_cast<T &>(e).*retornaTempo)());
+
+    return tempos;
+}
+
+
 template <typename T, typename U>
 std::vector<U> retornaTemposEspecifico(const std::vector<T>& v, U (T::*retornaTempo)() const)
 {
@@ -143,7 +155,7 @@ std::vector<U> retornaTemposEspecifico(const std::vector<T>& v, U (T::*retornaTe
     return tempos;
 }
 
-std::vector<double> retornaTemposEspecifico(const std::vector<Evento>& v, int (Evento::*retornaTempo)() const)
+/*std::vector<double> retornaTemposEspecifico(const std::vector<Evento>& v, int (Evento::*retornaTempo)() const)
 {
     std::vector<double> tempos;
 
@@ -151,7 +163,7 @@ std::vector<double> retornaTemposEspecifico(const std::vector<Evento>& v, int (E
         tempos.push_back((const_cast<Evento &>(e).*retornaTempo)());
 
     return tempos;
-}
+}*/
 
 double retornaTempoEspecifico(const std::vector<double>& tempos, const int& indice, const int& n)
 {
