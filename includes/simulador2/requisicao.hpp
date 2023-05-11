@@ -1,9 +1,7 @@
 #ifndef REQUISICAO_HPP
 #define REQUISICAO_HPP
 
-#include <string>
-
-enum TIPO_CHEGADA
+enum TIPO_REQUISICAO
 {
     CHEGADA,
     SAIDA
@@ -14,15 +12,15 @@ class Requisicao
     private:
 
         double tempoRequisicao;
-        TIPO_CHEGADA tipo;
+        TIPO_REQUISICAO tipo;
 
     public:
 
-        Requisicao(double tempoRequisicao, const TIPO_CHEGADA tipo);
+        Requisicao(double tempoRequisicao, const TIPO_REQUISICAO tipo);
 
         double retornaTempoRequisicao() const;
 
-        TIPO_CHEGADA retornaTipoRequisicao() const;
+        TIPO_REQUISICAO retornaTipoRequisicao() const;
 };
 
 #endif
