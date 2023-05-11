@@ -188,12 +188,12 @@ void Estatisticas::imprimeAnaliseAmostral()
     std::cout << "Média amostral de tempo no sistema (E(T)): " << this->retornaTempoMedioSistema() << std::endl; 
     std::cout << "Média amostral de tempo na fila (E(W)): " << this->retornaTempoMedioFila() << std::endl;
 
-    std::cout << "Variância amostral de processos no sistema (E(N)): " << this->retornaVarianciaProcessosSistema() << std::endl;
+    std::cout << "\nVariância amostral de processos no sistema (E(N)): " << this->retornaVarianciaProcessosSistema() << std::endl;
     std::cout << "Variância amostral de processos na fila (E(N_q)): " << this->retornaVarianciaFilaSistema() << std::endl;     
     std::cout << "Variância amostral de tempo no sistema (E(T)): " << this->retornaVarianciaTempoSistema() << std::endl; 
     std::cout << "Variância amostral de tempo na fila (E(W)): " << this->retornaVarianciaTempoFila() << std::endl;
 
-    std::cout << "Desvio padrão amostral de processos no sistema (E(N)): " << this->retornaDesvioPadraoProcessosSistema() << std::endl;
+    std::cout << "\nDesvio padrão amostral de processos no sistema (E(N)): " << this->retornaDesvioPadraoProcessosSistema() << std::endl;
     std::cout << "Desvio padrão amostral de processos na fila (E(N_q)): " << this->retornaDesvioPadraoFilaSistema() << std::endl;     
     std::cout << "Desvio padrão amostral de tempo no sistema (E(T)): " << this->retornaDesvioPadraoTempoSistema() << std::endl; 
     std::cout << "Desvio padrão amostral de tempo na fila (E(W)): " << this->retornaDesvioPadraoTempoFila() << std::endl;
@@ -213,6 +213,9 @@ void Estatisticas::imprimeAnaliseAmostral()
     intervalo = this->retornaIntervaloConfiancaTempoFila();
 
     std::cout << "Intervalo de confiança de tempo na fila (E(W)): [" << intervalo["inferior"] << ", " << intervalo["superior"]<< "]" << std::endl;
+}
 
-
+std::vector<Metricas> Estatisticas::retornaMetricas() const
+{
+    return this->amostras;
 }

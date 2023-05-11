@@ -41,6 +41,8 @@ class Estatisticas
     public:
         void adicionaAmostra(const Metricas& amostra);
 
+        std::vector<Metricas> retornaMetricas() const;
+
         void calculaVarianciasDesviosPadroesAmostrais();
 
         void calculaIntervalosConfianca(const double& probabilidadeTaxaConfianca);

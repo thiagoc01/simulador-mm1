@@ -1,5 +1,6 @@
 #include "estatistica/estatisticas.hpp"
 #include "thread/thread.hpp"
+#include "grafico/grafico.hpp"
 
 #include <iostream>
 
@@ -22,6 +23,8 @@ int main(int argc, char** argv)
     estatisticas.calculaVarianciasDesviosPadroesAmostrais();
     estatisticas.calculaIntervalosConfianca(1.96);
     estatisticas.imprimeAnaliseAmostral();
+
+    plotaGrafico(estatisticas);
     
     return 0;
 }
