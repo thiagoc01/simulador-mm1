@@ -14,6 +14,11 @@ static std::vector<double> temposSistema; // Guarda os tempos no sistema de cada
 static std::vector<std::pair<double, int>> numerosProcessosFilaPeriodo; // Guarda o número de processos no sistema em um intervalo de tempo
 static std::vector<std::pair<double, int>> numerosProcessosSistemaPeriodo; // Guarda o número de processos na fila em um intervalo de tempo
 
+/* Ponteiros de função para a geração de tempos de serviço de forma determínistica ou probabilística */
+
+static double (*geraTempoServicoDeterministico)(double mediaServico) = [](double mediaServico){return mediaServico; };
+static double (*geraTempoServicoProbabilistico)(double mediaServico) = [](double mediaServico){return retornaTempoExponencial(mediaServico); };
+
 static double tempoSimulacao = 0.0; // Tempo do simulador (snapshots de eventos)
 static double ultimoEvento = 0.0; // Ocorrência da última chegada ou saída
 static double tempoSistemaRespostaMedia; // Armazena E(T)
@@ -21,7 +26,7 @@ static double tempoSistemaEsperaMedia; // Armazena E(W)
 static double numProcessosSistemaTotal = 0.0; // Somatório do número de processos no sistema
 static double numProcessosFilaTotal = 0.0; // Somatório do número de processos na fila
 
-/* Função que fazer a inicialização das variáveis utilizadas*/
+/* Função que faz a inicialização das variáveis utilizadas*/
 void reiniciaVariaveis()
 {
     numProcessosSistema = 0;
@@ -109,7 +114,6 @@ void atualizaSistema(const double& tempoChegada, const double& tempoSaida)
         numProcessosSistema++;
     }
     
-
     else
     {
         /* A requisição antes de ser atendida estava na fila. Guarda o período de tempo e a quantidade antes do atendimento */
@@ -144,17 +148,25 @@ void atualizaSistema(const double& tempoChegada, const double& tempoSaida)
 }
 
 /* Função que recebe o λ, o μ e o número de iterações do simulador e roda o simulador do tipo M/M/1 */
-void simulaFilaProbabilisticaMM1(int numIteracoes, double mediaChegada, double mediaServico)
+void simulaFilaMM1(int numIteracoes, double mediaChegada, double mediaServico, bool eDeterminismo)
 {
+    double (*geraTempoServico)(double mediaServico);
+
     /* Inicializa as variáveis */
     reiniciaVariaveis();
+
+    if (eDeterminismo)
+        geraTempoServico = geraTempoServicoDeterministico;
+    
+    else
+        geraTempoServico = geraTempoServicoProbabilistico;
     
     /* Loop que roda o simulador até o número de iterações desejado */
     for (int i = 0 ; i < numIteracoes ; i++)
     {
         /* Gera um tempo de chegada com distribuição de Poisson e um tempo de serviço pela distribuição Exponencial */
         double tempoChegada = retornaTempoPoisson(1.0 / mediaChegada);
-        double tempoSaida = retornaTempoExponencial(1.0 / mediaServico);
+        double tempoSaida = geraTempoServico(1.0 / mediaServico);
         
         /* Faz a atualização dos tempos para a próxima iteração */
         atualizaSistema(tempoChegada, tempoSaida);     

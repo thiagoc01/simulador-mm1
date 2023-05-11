@@ -3,6 +3,6 @@
 
 #include <iostream>
 
-void simulaFilaProbabilisticaMM1(int numIteracoes, double mediaChegada, double mediaServico);
+void simulaFilaMM1(int numIteracoes, double mediaChegada, double mediaServico, bool eDeterministico);
 
 #endif

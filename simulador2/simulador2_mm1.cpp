@@ -14,6 +14,9 @@ struct ComparadorTemposRequisicao
     }
 };
 
+static double (*geraTempoServicoDeterministico)(double mediaServico) = [](double mediaServico){return mediaServico; };
+static double (*geraTempoServicoProbabilistico)(double mediaServico) = [](double mediaServico){return retornaTempoExponencial(mediaServico); };
+
 double tempoSimulacao = 0.0;
 double ultimoEvento = 0.0;
 
@@ -42,6 +45,31 @@ double retornaSomaPessoas(const std::vector<std::pair<double, int>>& numeroProce
     }
 
     return soma;
+}
+
+void calculaMetricas()
+{
+    double mediaProcessosSistema = retornaSomaPessoas(numeroProcessosSistemaPeriodo) / tempoSimulacao;
+    double mediaProcessosFila = retornaSomaPessoas(numeroProcessosFilaPeriodo) / tempoSimulacao;
+    double tempoMedioSistema;
+    double tempoMedioEspera;
+
+    if (temposSistema.empty())
+        tempoMedioSistema = 0.0;
+
+    else
+        tempoMedioSistema = std::accumulate(temposSistema.begin(), temposSistema.end(), 0.0) / temposSistema.size();
+
+    if (temposEspera.empty())
+        tempoMedioEspera = 0.0;
+
+    else
+        tempoMedioEspera = std::accumulate(temposEspera.begin(), temposEspera.end(), 0.0) / temposEspera.size();
+    
+    std::cout << "\n\nNúmero médio de processos no sistema (E(N)): " << mediaProcessosSistema << std::endl;
+    std::cout << "Número médio de processos na fila (E(N_q)): " << mediaProcessosSistema << std::endl;     
+    std::cout << "Tempo médio no sistema (E(T)): " << tempoMedioSistema << std::endl; 
+    std::cout << "Tempo médio na fila (E(W)): " << tempoMedioEspera << std::endl; 
 }
 
 void atualizaSistema(const double& tempoChegada, const double& tempoServico)
@@ -99,10 +127,19 @@ void atualizaSistema(const double& tempoChegada, const double& tempoServico)
     }
 }
 
-void simulaFilaMM1Probabilistica(int numIteracoes, double mediaChegada, double mediaServico)
+
+
+void simulaFilaMM1(int numIteracoes, double mediaChegada, double mediaServico, bool eDeterministico)
 {
+    double (*geraTempoServico)(double mediaServico);
+
+    if (eDeterministico)
+        geraTempoServico = geraTempoServicoDeterministico;
+    else
+        geraTempoServico = geraTempoServicoProbabilistico;
+
     double tempoChegada = retornaTempoPoisson(1.0 / mediaChegada);
-    double tempoServico = retornaTempoExponencial(1.0 / mediaServico);
+    double tempoServico = geraTempoServico(1.0 / mediaServico);
 
     Requisicao requisicao = Requisicao(tempoChegada, CHEGADA);
 
@@ -111,14 +148,11 @@ void simulaFilaMM1Probabilistica(int numIteracoes, double mediaChegada, double m
     for (int i = 0 ; i < numIteracoes && !filaRequisicoes.empty() ; i++)
     {
         tempoChegada = retornaTempoPoisson(1.0 / mediaChegada);
-        tempoServico = retornaTempoExponencial(1.0 / mediaServico);
+        tempoServico = geraTempoServico(1.0 / mediaServico);
 
         atualizaSistema(tempoChegada, tempoServico);
     }
 
-    std::cout << "\n\nNúmero médio de processos no sistema (E(N)): " << retornaSomaPessoas(numeroProcessosSistemaPeriodo) / tempoSimulacao << std::endl;
-    std::cout << "Número médio de processos na fila (E(N_q)): " << retornaSomaPessoas(numeroProcessosFilaPeriodo) / tempoSimulacao << std::endl;     
-    std::cout << "Tempo médio no sistema (E(T)): " << std::accumulate(temposSistema.begin(), temposSistema.end(), 0.0) / temposSistema.size() << std::endl; 
-    std::cout << "Tempo médio na fila (E(W)): " << std::accumulate(temposEspera.begin(), temposEspera.end(), 0.0) / temposEspera.size() << std::endl; 
+    calculaMetricas();
 }
             

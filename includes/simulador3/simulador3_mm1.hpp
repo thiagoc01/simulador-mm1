@@ -1,5 +1,5 @@
-#ifndef SIMULADOR_MM1_PROB_HPP
-#define SIMULADOR_MM1_PROB_HPP
+#ifndef SIMULADOR3_MM1_PROB_HPP
+#define SIMULADOR3_MM1_PROB_HPP
 
 #include <iostream>
 #include <unordered_map>
