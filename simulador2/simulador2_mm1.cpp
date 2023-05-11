@@ -4,7 +4,7 @@
 #include <mutex>
 
 #include "simulador2/requisicao.hpp"
-#include "simulador2/simulador2_mm1.hpp"
+#include "simulador_mm1.hpp"
 #include "geracao_tempos.hpp"
 #include "estatistica/metricas.hpp"
 #include "estatistica/estatisticas.hpp"
@@ -101,7 +101,7 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     mutexEstatisticas.unlock();
 }
 
-void trataEventoChegada(const Requisicao& cabelaFila, const double& tempoChegada, const double& tempoSaida, ParametrosSimulador& parametros)
+void trataEventoChegada(const Requisicao& cabecaFila, const double& tempoChegada, const double& tempoServico, ParametrosSimulador& parametros)
 {
     parametros.tempoSimulacao = cabecaFila.retornaTempoRequisicao(); // Atualiza o tempo para esse evento
 
@@ -127,7 +127,7 @@ void trataEventoChegada(const Requisicao& cabelaFila, const double& tempoChegada
         parametros.filaRequisicoes.push(Requisicao(parametros.tempoSimulacao + tempoServico, SAIDA)); // Agenda o tratamento dessa saída
 }
 
-void trataEventoSaida(const Requisicao& cabelaFila, const double& tempoChegada, const double& tempoSaida, ParametrosSimulador& parametros)
+void trataEventoSaida(const Requisicao& cabecaFila, const double& tempoChegada, const double& tempoServico, ParametrosSimulador& parametros)
 {
     /* Análogo ao do evento da chegada */
 

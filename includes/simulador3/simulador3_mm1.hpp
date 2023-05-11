@@ -9,6 +9,7 @@
 
 #include "requisicao.hpp"
 #include "evento.hpp"
+#include "simulador_mm1.hpp"
 
 template <typename T>
 void adicionaEntradaVetor(std::vector<T>& v, T entrada);
@@ -26,7 +27,5 @@ template <typename T, typename U>
 std::vector<U> retornaTemposEspecifico(const std::vector<T>& v, U (T::*retornaTempo)() const);
 
 void iniciaSimulacao(const std::unordered_map<std::string, double>& parametros);
-
-void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, bool eDeterministico);
 
 #endif
