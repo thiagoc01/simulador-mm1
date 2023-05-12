@@ -1,5 +1,6 @@
 #include "simulador3/simulador3_mm1.hpp"
 
+//Recebe os parâmetros do simulador na linha de comando de chamada do sistema
 int main(int argc, char** argv)
 {
     if (argc < 4)

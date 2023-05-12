@@ -5,12 +5,26 @@
 #include <queue>
 #include <limits>
 
+/*
+* Trabalho de Simulação 3 - Extra
+* Integrantes: Augusto Guimarães, Luiz Rodrigo Lace, Livia Fonseca, Pedro Henrique Bernardino e Thiago Figueiredo 
+*
+* Este Trabalho consiste em utilizar uma nova abordagem para simular a chegada de requisições num sistema, dadas a
+* taxa de serviço e a de chegada. O simulador gera uma distribuição para as chegadas e serviços, roda uma simulação de gerenciamento
+* da fila do sistema com esses dados, e por fim gera métricas de saída com base nos resultados obtidos.
+*/
+
+
+
+//Função responsável por inserir um elemento em um vetor. Utilizada tanto para requisições como para eventos
 template <typename T>
 void adicionaEntradaVetor(std::vector<T>& v, T entrada)
 {
     v.push_back(entrada);
 }
 
+
+//Função auxiliar responsável por calcular a média dos valores de um vetor. Utilizada no cálculo das métricas
 double calculaMedia(const std::vector<double>& v)
 {
     if (v.empty())
@@ -19,6 +33,7 @@ double calculaMedia(const std::vector<double>& v)
     return std::accumulate(v.begin(), v.end(), 0.0) / v.size();    
 }
 
+//Função utilizada no cálculo das métricas. Calcula a Esperança de uma váriável aleatória com base na sua distribuição
 double calculaEsperanca(const std::vector<double>& v, const std::vector<double>& u, double durTotal)
 {
     double soma = 0.0;
@@ -32,6 +47,7 @@ double calculaEsperanca(const std::vector<double>& v, const std::vector<double>&
     return soma / durTotal;
 }
 
+//Função principal para calcular as métricas após a rodada da simulação , dada a lista de requisições, de eventos e do tempo total de atendimento
 void calculaMetricas(const std::vector<Requisicao>& requisicoes, const std::vector<Evento>& eventos, const double& tempoAtendimentoTotal)
 {
     double taxaMediaChegadasSimulada = calculaMedia(retornaTemposEspecifico(requisicoes, &Requisicao::retornaTempoChegada));
@@ -62,6 +78,7 @@ void calculaMetricas(const std::vector<Requisicao>& requisicoes, const std::vect
     std::cout << "Média número de processos na fila (E(N_q)) (Lei de Little): " << mediaChegadasSimulada * mediaTempoEsperaSimulada << std::endl;
 }
 
+//retorna o tempo de serviço total do sistema, desde o início do atendimento da primeira até o final do atendimento da última requisição
 double retornaTempoAtendimentoSistema(const std::vector<Requisicao>& requisicoes)
 {
     double ultimoTempoSaida = requisicoes.at(requisicoes.size() - 1).retornaTempoSaidaSistema();
@@ -70,6 +87,7 @@ double retornaTempoAtendimentoSistema(const std::vector<Requisicao>& requisicoes
     return ultimoTempoSaida - primeiroTempoChegada;
 }
 
+//Função que imprime os dados de cada evento ocorrido na simulação.
 void imprimeEventos(const std::vector<Evento>& eventos)
 {
     std::cout << "Tempo \t N na fila \t N no sistema \t Tipo \t Ultimo Inicio\n";
@@ -83,10 +101,14 @@ void imprimeEventos(const std::vector<Evento>& eventos)
     }
 }
 
+//Função que gera os valores determinísticos de tempo de serviço
 static double (*geraTempoServicoDeterministico)(double mediaServico) = [](double mediaServico){return mediaServico; };
+
+//Função que gera os valores probabilísticos de tempo de serviço com base em uma distribuição exponencial, cuja média é passada por parâmetro
 static double (*geraTempoServicoProbabilistico)(double mediaServico) = [](double mediaServico){return retornaTempoExponencial(mediaServico); };
 
-
+//Gera o tempo dos eventos baseado nos parâmetros lambda (média de chegadas) e beta (média de tempo de serviço), além da
+//variável booleana que decide se o tempo de serviço usado será probabilístico ou determinístico. 
 std::vector<Requisicao> geraTemposEventos(const int& n, const double& lambda, const double& beta, const bool& eDeterministico)
 {
     double (*geraTempoServico)(double mediaServico);
@@ -95,11 +117,13 @@ std::vector<Requisicao> geraTemposEventos(const int& n, const double& lambda, co
     double tempoChegada = retornaTempoPoisson(lambda);
     double tempoServico;
 
+    //gera o tempo de serviço dos eventos de forma determinística ou probabilística, conforme determinado no parâmetro de entrada
     if (eDeterministico)
         geraTempoServico = geraTempoServicoDeterministico;
     else
         geraTempoServico = geraTempoServicoProbabilistico;
 
+    //gerando os dados da primeira requisição
     tempoServico = geraTempoServico(beta);
     double tempoChegadaAcumulativo = tempoChegada;
     double tempoInicioServico = tempoChegada;
@@ -109,18 +133,29 @@ std::vector<Requisicao> geraTemposEventos(const int& n, const double& lambda, co
     Requisicao novo = Requisicao(tempoChegada, tempoServico, tempoChegadaAcumulativo, tempoInicioServico,
                     tempoSaidaSistema, tempoSistema, tempoFila);
 
+    //adiciona a requisição ao vetor
     adicionaEntradaVetor(ret, novo);
 
+    //gera o tempo de chegada, início de serviço e saída de todas as requisições
     for (int i = 1 ; i < n ; i++)
     {
         tempoChegada = retornaTempoPoisson(lambda);
         tempoServico = geraTempoServico(beta);
+
+        //gera o tempo de chegada da requisição atual com base no tempo atual de simulação e do valor gerado na distribuição
         tempoChegadaAcumulativo += tempoChegada;
 
+        //o tempo de serviço é o tempo que a ultima requisição já foi atendida e a atual já chegou. Portanto , o maior valor entre 
+        //o tempo dos dois eventos
         tempoInicioServico = std::max(tempoChegadaAcumulativo, ret[i - 1].retornaTempoSaidaSistema());
+
+        //o tempo de saída do sistema é um cálculo simples: é o tempo de início mais o tempo de serviço do sistema
         tempoSaidaSistema = tempoInicioServico + tempoServico;
 
+        //tempo total no sistema
         tempoSistema = tempoSaidaSistema - tempoChegadaAcumulativo;
+
+        //tempo de espera na fila
         tempoFila = tempoInicioServico - tempoChegadaAcumulativo;
         
         novo = Requisicao(tempoChegada, tempoServico, tempoChegadaAcumulativo, tempoInicioServico,
@@ -132,6 +167,8 @@ std::vector<Requisicao> geraTemposEventos(const int& n, const double& lambda, co
     return ret;
 }
 
+//retorna os tempos de ocorrência de cada elemento de um vetor de requisições de acordo com a função recebida como entrada para pegar o tipo
+// de tempo desejado
 template <typename T, typename V> requires std::is_integral_v<V>
 std::vector<double> retornaTemposEspecifico(const std::vector<T>& v, V (T::*retornaTempo)() const)
 {
@@ -143,7 +180,7 @@ std::vector<double> retornaTemposEspecifico(const std::vector<T>& v, V (T::*reto
     return tempos;
 }
 
-
+//Retorna os tempos de ocorrência de cada elemento de um vetor de eventos
 template <typename T, typename U>
 std::vector<U> retornaTemposEspecifico(const std::vector<T>& v, U (T::*retornaTempo)() const)
 {
@@ -155,6 +192,7 @@ std::vector<U> retornaTemposEspecifico(const std::vector<T>& v, U (T::*retornaTe
     return tempos;
 }
 
+//Retorna o indice-ésimo valor de um vetor de números representando o tempo
 double retornaTempoEspecifico(const std::vector<double>& tempos, const int& indice, const int& n)
 {
     if (indice < n)
@@ -163,10 +201,12 @@ double retornaTempoEspecifico(const std::vector<double>& tempos, const int& indi
         return std::numeric_limits<double>::max();
 }
 
+//gera cada um dos eventos do simulador, incluindo a chegada, início de serviço e saída das requisições
 std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisicao>& requisicoes)
 {
     std::vector<Evento> ret;
 
+    //retorna os tempos de chegada, início e saída das requisições
     std::vector<double> temposChegada = retornaTemposEspecifico(requisicoes, &Requisicao::retornaTempoChegadaAcumulativo);
     std::vector<double> temposInicio = retornaTemposEspecifico(requisicoes, &Requisicao::retornaTempoInicioServico);
     std::vector<double> temposSaida = retornaTemposEspecifico(requisicoes, &Requisicao::retornaTempoSaidaSistema);
@@ -180,6 +220,7 @@ std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisi
     std::string tipoEvento;
     double ultimoInicio = 0.0;
 
+    //loop que organiza as ocorrências dos eventos em ordem cronológica
     while (temposSaidaIndice < n)
     {
         double tempoChegadaAtual = retornaTempoEspecifico(temposChegada, temposChegadaIndice, n);
@@ -187,6 +228,7 @@ std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisi
         double tempoSaidaAtual = retornaTempoEspecifico(temposSaida, temposSaidaIndice, n);
         int mudancaElementosFila, mudancaElementosSistema;
 
+        //o próximo evento é a chegada de uma requisição
         if (tempoChegadaAtual <= tempoInicioAtual && tempoChegadaAtual <= tempoSaidaAtual)
         {
             tempoEvento = tempoChegadaAtual;
@@ -200,6 +242,7 @@ std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisi
             adicionaEntradaVetor(ret, novo);
         }
 
+        //o próximo evento é a saída de uma requisição
         else if (tempoSaidaAtual <= tempoChegadaAtual  && tempoSaidaAtual <= tempoInicioAtual)
         {
             tempoEvento = tempoSaidaAtual;
@@ -214,6 +257,7 @@ std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisi
             adicionaEntradaVetor(ret, novo);           
         }
 
+        //o próximo evento é o início de um serviço
         else
         {
             tempoEvento = tempoInicioAtual;
@@ -232,12 +276,15 @@ std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisi
         numeroElementosSistema += mudancaElementosSistema;
         numeroElementosFila += mudancaElementosFila;
 
+        //iterador de tempo. No caso deste simulador, o tempo não é discreto, então o iterador anda de evento em evento, até a saída
+        // da última requisição
         ultimoEvento = tempoEvento;
     }
 
     return ret;
 }
 
+//função principal, responsável por iniciar as variáveis de acordo com os parâmetros especificados
 void iniciaSimulacao(const std::unordered_map<std::string, double>& parametros, const bool& eDeterministico)
 {
     int n = static_cast<int>(parametros.find("n")->second);
@@ -257,6 +304,7 @@ void iniciaSimulacao(const std::unordered_map<std::string, double>& parametros, 
     calculaMetricas(requisicoes, eventos, tempoAtendimentoTotal);
 }
 
+//chama o simulador com os parametros de uma simulação de fila M/M/1
 void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, bool eDeterministico)
 {
     std::unordered_map<std::string, double> parametros = std::unordered_map<std::string, double>();
