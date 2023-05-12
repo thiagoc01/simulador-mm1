@@ -35,12 +35,12 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
         this->numeroMedioProcessosSistema += amostra.retornaNumeroMedioProcessosSistema();
         this->numeroMedioFilaSistema += amostra.retornaNumeroMedioFilaSistema();
         this->tempoMedioSistema += amostra.retornaTempoMedioSistema();
-        this->tempoMedioFila += amostra.retornaNumeroMedioFilaSistema();
-
+        this->tempoMedioFila += amostra.retornaTempoMedioFila();
+        
         esperancaQuadradoProcessosSistema += (amostra.retornaNumeroMedioProcessosSistema() * amostra.retornaNumeroMedioProcessosSistema());
         esperancaQuadradoFilaSistema += (amostra.retornaNumeroMedioFilaSistema() * amostra.retornaNumeroMedioFilaSistema());
         esperancaQuadradoTempoMedioSistema += (amostra.retornaTempoMedioSistema() * amostra.retornaTempoMedioSistema());
-        esperancaQuadradoTempoMedioFila += (amostra.retornaNumeroMedioFilaSistema() * amostra.retornaNumeroMedioFilaSistema());
+        esperancaQuadradoTempoMedioFila += (amostra.retornaTempoMedioFila() * amostra.retornaTempoMedioFila());
     }
 
     /* As 8 linhas a seguir dividem o numerador pelo tamanho da amostra para obter E(X) e E(X ^ 2) */
