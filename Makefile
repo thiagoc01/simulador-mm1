@@ -15,11 +15,18 @@ ifeq ($(OS),Windows_NT)
 	appDataRoaming = $(shell echo ${APPDATA})
 	appData = $(subst Roaming,\,$(appDataRoaming))
 	INCLUDEDIR1 = includes/
-	INCLUDEDIR2 = "$(appData)\Local\Programs\Python\Python$(versaoPython2)\include"
+	INCLUDEDIR2 = $(appData)\Local\Programs\Python\Python$(versaoPython2)\include
 	INCLUDEDIR3 = "$(appData)\Local\Programs\Python\Python$(versaoPython2)\Lib\site-packages\numpy\core\include"
 	LIB = "$(appData)\Local\Programs\Python\Python$(versaoPython2)\libs"
-	FLAGS = -I $(INCLUDEDIR1) -I $(INCLUDEDIR2) -I $(INCLUDEDIR3) -L $(LIB) -std=c++2a -lpython$(versaoPython2) -lpthread -w
-	
+	FLAGS = -I $(INCLUDEDIR1) -I "$(INCLUDEDIR2)" -I $(INCLUDEDIR3) -L $(LIB) -std=c++2a -lpython$(versaoPython2) -lpthread -w
+
+	ifeq ("$(wildcard $(INCLUDEDIR2))", "")
+		INCLUDEDIR2 = "$(appData)\Local\Programs\Python\Python$(versaoPython)\include"
+		INCLUDEDIR3 = "$(appData)\Local\Programs\Python\Python$(versaoPython)\Lib\site-packages\numpy\core\include"
+		LIB = "$(appData)\Local\Programs\Python\Python$(versaoPython)\libs"
+		FLAGS = -I $(INCLUDEDIR1) -I $(INCLUDEDIR2) -I $(INCLUDEDIR3) -L $(LIB) -std=c++2a -lpython$(versaoPython) -lpthread -w
+	endif
+		
 else
 	ifeq ($(shell uname -s), Linux)
 
@@ -63,6 +70,7 @@ else
 
 
 endif
+
 
 CXX = g++
 OBJ1 = simulador1_mm1.o thread.o grafico.o geracao_tempos.o estatisticas.o metricas.o

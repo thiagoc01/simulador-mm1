@@ -25,6 +25,8 @@ std::vector<Requisicao> geraTemposEventos(const int& n, const double& lambda, co
 //gera cada um dos eventos do simulador, incluindo a chegada, início de serviço e saída das requisições
 std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisicao>& requisicoes);
 
+template <typename T, typename V> requires std::is_integral_v<V>
+std::vector<double> retornaTemposEspecifico(const std::vector<T>& v, V (T::*retornaTempo)() const);
 
 //retorna os tempos de ocorrência de cada elemento de um vetor de requisições de acordo com a função recebida como entrada para pegar o tipo
 // de tempo desejado
