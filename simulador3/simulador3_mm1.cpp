@@ -1,9 +1,12 @@
 #include "geracao_tempos.hpp"
 
 #include "simulador3/simulador3_mm1.hpp"
+#include "estatistica/estatisticas.hpp"
+#include "estatistica/metricas.hpp"
 
 #include <queue>
 #include <limits>
+#include <mutex>
 
 /*
 * Trabalho de Simulação 3 - Extra
@@ -14,7 +17,9 @@
 * da fila do sistema com esses dados, e por fim gera métricas de saída com base nos resultados obtidos.
 */
 
+Estatisticas estatisticas;
 
+static std::mutex mutexEstatisticas;
 
 //Função responsável por inserir um elemento em um vetor. Utilizada tanto para requisições como para eventos
 template <typename T>
@@ -22,7 +27,6 @@ void adicionaEntradaVetor(std::vector<T>& v, T entrada)
 {
     v.push_back(entrada);
 }
-
 
 //Função auxiliar responsável por calcular a média dos valores de um vetor. Utilizada no cálculo das métricas
 double calculaMedia(const std::vector<double>& v)
@@ -65,7 +69,7 @@ void calculaMetricas(const std::vector<Requisicao>& requisicoes, const std::vect
 
     double mediaNumeroProcessosFila = calculaEsperanca(retornaTemposEspecifico(eventos, &Evento::retornaNumeroElementosFila), 
                                             retornaTemposEspecifico(eventos, &Evento::retornaDelayUltimoEvento), tempoAtendimentoTotal);
-    std::cout << "Média tempos de chegada/taxa (Lambda e 1/Lambda): " << mediaChegadasSimulada << " " << taxaMediaChegadasSimulada << std::endl;
+    /*std::cout << "Média tempos de chegada/taxa (Lambda e 1/Lambda): " << mediaChegadasSimulada << " " << taxaMediaChegadasSimulada << std::endl;
     std::cout << "Média tempos de serviços/taxa (Mi e 1/Mi): " << mediaServicosSimulada << " " << taxaMediaServicosSimulada << std::endl;
     std::cout << "Média tempos de espera (E(W)): " << mediaTempoEsperaSimulada << std::endl;
     std::cout << "Média tempos de resposta (E(T)): " << mediaTempoRespostaSimulada << std::endl;
@@ -75,7 +79,13 @@ void calculaMetricas(const std::vector<Requisicao>& requisicoes, const std::vect
 
     std::cout << "Média número de processos na fila (E(N_q)): " << mediaNumeroProcessosFila << std::endl;
 
-    std::cout << "Média número de processos na fila (E(N_q)) (Lei de Little): " << mediaChegadasSimulada * mediaTempoEsperaSimulada << std::endl;
+    std::cout << "Média número de processos na fila (E(N_q)) (Lei de Little): " << mediaChegadasSimulada * mediaTempoEsperaSimulada << std::endl;*/
+
+    mutexEstatisticas.lock();
+
+    estatisticas.adicionaAmostra(Metricas(mediaChegadasSimulada * mediaTempoRespostaSimulada, mediaChegadasSimulada * mediaTempoEsperaSimulada, mediaTempoRespostaSimulada, mediaTempoEsperaSimulada));
+
+    mutexEstatisticas.unlock();
 }
 
 //retorna o tempo de serviço total do sistema, desde o início do atendimento da primeira até o final do atendimento da última requisição
@@ -295,10 +305,10 @@ void iniciaSimulacao(const std::unordered_map<std::string, double>& parametros, 
     std::vector<Requisicao> requisicoes = geraTemposEventos(n, taxaMediaChegada, taxaServico, eDeterministico);
     std::vector<Evento> eventos = geraEventosSimulador(n, requisicoes);
     
-    imprimeEventos(eventos);
+    //imprimeEventos(eventos);
 
     tempoAtendimentoTotal = retornaTempoAtendimentoSistema(requisicoes);
-    std::cout << "\n\nTempo de atendimento do sistema: " << tempoAtendimentoTotal << std::endl;
+    //std::cout << "\n\nTempo de atendimento do sistema: " << tempoAtendimentoTotal << std::endl;
 
 
     calculaMetricas(requisicoes, eventos, tempoAtendimentoTotal);

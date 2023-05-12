@@ -4,7 +4,7 @@
 #include <thread>
 #include <vector>
 
-#ifndef NUM_THREADS
+#if !defined(NUM_THREADS) || defined(NUM_THREADS) && NUM_THREADS <= 0
 
 #define NUM_THREADS 5
 

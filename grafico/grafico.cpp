@@ -9,6 +9,8 @@ void realizaAcoesPlotagem(const std::vector<double>& medias, const double& media
 {
     plt::hist(medias, 10, "darkmagenta", 1.0, false, {{"edgecolor", "black"}});
     
+    /* Printa a linha que representa a média */
+    
     plt::axvline(media, 0.0, std::numeric_limits<float>::max(), {{"color", "#74ff74"}, {"linestyle", "--"}, {"label", "Média"}});
     
     plt::xlabel(strings[0]);

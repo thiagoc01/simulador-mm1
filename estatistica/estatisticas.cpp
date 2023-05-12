@@ -200,7 +200,7 @@ void Estatisticas::imprimeAnaliseAmostral()
 
     auto intervalo = this->retornaIntervaloConfiancaProcessosSistema();
 
-    std::cout << "Intervalo de confiança de processos no sistema (E(N)): [" << intervalo["inferior"] << ", " << intervalo["superior"]<< "]" << std::endl;
+    std::cout << "\nIntervalo de confiança de processos no sistema (E(N)): [" << intervalo["inferior"] << ", " << intervalo["superior"]<< "]" << std::endl;
 
     intervalo = this->retornaIntervaloConfiancaFilaSistema();
 
