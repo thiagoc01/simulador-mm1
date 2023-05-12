@@ -14,8 +14,8 @@ void inicializaThreads(int numIteracoes, double taxaChegada, double taxaSaida, b
     std::vector<std::thread> threads;
 
     for (int i = 0 ; i < NUM_THREADS ; i++)
-    {
         threads.push_back(std::thread(executaSimulacoes, numIteracoes, taxaChegada, taxaSaida, eDeterministico));
+
+    for (int i = 0 ; i < NUM_THREADS ; i++)
         threads[i].join();
-    } 
 }
