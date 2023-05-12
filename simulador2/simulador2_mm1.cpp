@@ -89,10 +89,16 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     else
         tempoMedioEspera = std::accumulate(parametros.temposEspera.begin(), parametros.temposEspera.end(), 0.0) / parametros.temposEspera.size();
     
-    // std::cout << "\n\nNúmero médio de processos no sistema (E(N)): " << mediaProcessosSistema << std::endl;
-    // std::cout << "Número médio de processos na fila (E(N_q)): " << mediaProcessosSistema << std::endl;     
-    // std::cout << "Tempo médio no sistema (E(T)): " << tempoMedioSistema << std::endl; 
-    // std::cout << "Tempo médio na fila (E(W)): " << tempoMedioEspera << std::endl;
+    #if NUM_THREADS == 1 && TAMANHO_AMOSTRA == 1
+
+    std::cout << "\n\nNúmero médio de processos no sistema (E(N)): " << mediaProcessosSistema << std::endl;
+    std::cout << "Número médio de processos na fila (E(N_q)): " << mediaProcessosSistema << std::endl;     
+    std::cout << "Tempo médio no sistema (E(T)): " << tempoMedioSistema << std::endl; 
+    std::cout << "Tempo médio na fila (E(W)): " << tempoMedioEspera << std::endl;
+    
+    std::cout << std::endl;
+
+    #endif
 
     mutexEstatisticas.lock();
 
@@ -112,7 +118,11 @@ void trataEventoChegada(const Requisicao& cabecaFila, const double& tempoChegada
     parametros.numeroProcessosSistemaPeriodo.push_back({parametros.tempoSimulacao - parametros.ultimoEvento, parametros.numPessoasSistema});
     parametros.numeroProcessosFilaPeriodo.push_back({parametros.tempoSimulacao - parametros.ultimoEvento, parametros.numPessoasFila});
 
-    // std::cout << "Tempo: " << tempoSimulacao << " - CHEGADA " << numPessoasSistema << "->" << numPessoasSistema + 1 << std::endl;
+    #if NUM_THREADS == 1 && TAMANHO_AMOSTRA == 1
+
+    std::cout << "Tempo: " << parametros.tempoSimulacao << " - CHEGADA " << parametros.numPessoasSistema << "->" << parametros.numPessoasSistema + 1 << std::endl;
+
+    #endif
 
     /* Mais uma pessoa na fila e no sistema */
 
@@ -155,8 +165,12 @@ void trataEventoSaida(const Requisicao& cabecaFila, const double& tempoChegada, 
 
     parametros.numeroProcessosSistemaPeriodo.push_back({parametros.tempoSimulacao - parametros.ultimoEvento, parametros.numPessoasSistema});              
 
-    //std::cout << "Tempo: " << tempoSimulacao << " - SAÍDA " << numPessoasSistema << "->" << numPessoasSistema - 1 << std::endl;
+    #if NUM_THREADS == 1 && TAMANHO_AMOSTRA == 1
 
+    std::cout << "Tempo: " << parametros.tempoSimulacao << " - SAÍDA " << parametros.numPessoasSistema << "->" << parametros.numPessoasSistema - 1 << std::endl;
+
+    #endif
+    
     parametros.numPessoasSistema--; // Requisição tratada
 
     parametros.ultimoEvento = parametros.tempoSimulacao; // Informa que esse foi o último evento.

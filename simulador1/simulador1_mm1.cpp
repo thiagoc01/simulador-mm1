@@ -85,10 +85,15 @@ void calculaMetricas(const ParametrosSimulador& parametros)
     
     mutexEstatisticas.unlock();
 
-    //std::cout << "\n\nNúmero médio de processos no sistema (E(N)): " << numProcessosSistemaTotal / parametros.tempoSimulacao << std::endl;
-    //std::cout << "Número médio de processos na fila (E(N_q)): " << numProcessosFilaTotal / parametros.tempoSimulacao << std::endl;
-    //std::cout << "Tempo médio no sistema (E(T)): " <<  tempoSistemaRespostaMedia << std::endl;
-    //std::cout << "Tempo médio na fila (E(W)): " <<  tempoSistemaEsperaMedia << std::endl;
+    #if NUM_THREADS == 1 && TAMANHO_AMOSTRA == 1
+    
+    std::cout << "\n\nNúmero médio de processos no sistema (E(N)): " << numProcessosSistemaTotal / parametros.tempoSimulacao << std::endl;
+    std::cout << "Número médio de processos na fila (E(N_q)): " << numProcessosFilaTotal / parametros.tempoSimulacao << std::endl;
+    std::cout << "Tempo médio no sistema (E(T)): " <<  tempoSistemaRespostaMedia << std::endl;
+    std::cout << "Tempo médio na fila (E(W)): " <<  tempoSistemaEsperaMedia << std::endl;
+    std::cout << std::endl;
+
+    #endif
 }
 
 /* Função que recebe os tempos de chegada e de serviço e atualiza esses tempos */
@@ -113,9 +118,13 @@ void atualizaSistema(const double& tempoChegada, const double& tempoSaida, Param
         /* O processo entra na fila */
         parametros.numProcessosFila++;
         
+        #if NUM_THREADS == 1 && TAMANHO_AMOSTRA == 1
+
         /* Imprimindo o tempo de simulação, chegada e o número de processos atuais no sistema */
-        //std::cout << "Tempo: " << parametros.tempoSimulacao << " - CHEGADA " << parametros.numProcessosSistema << "->" << parametros.numProcessosSistema + 1 << std::endl;
+        std::cout << "Tempo: " << parametros.tempoSimulacao << " - CHEGADA " << parametros.numProcessosSistema << "->" << parametros.numProcessosSistema + 1 << std::endl;
         
+        #endif
+
         parametros.numProcessosSistema++;
     }
     
@@ -145,8 +154,12 @@ void atualizaSistema(const double& tempoChegada, const double& tempoSaida, Param
         
         parametros.ultimoEvento = parametros.tempoSimulacao;
         
+        #if NUM_THREADS == 1 && TAMANHO_AMOSTRA == 1
+
         /* Imprimindo o tempo de simulação, saída e o número de processos atuais no sistema */
-        //std::cout << "Tempo: " << parametros.tempoSimulacao << " - SAÍDA " << parametros.numProcessosSistema << "->" << parametros.numProcessosSistema - 1 << std::endl;
+        std::cout << "Tempo: " << parametros.tempoSimulacao << " - SAÍDA " << parametros.numProcessosSistema << "->" << parametros.numProcessosSistema - 1 << std::endl;
+
+        #endif
 
         parametros.numProcessosSistema--;
     }

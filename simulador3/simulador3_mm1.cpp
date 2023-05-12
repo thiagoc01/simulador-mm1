@@ -69,7 +69,10 @@ void calculaMetricas(const std::vector<Requisicao>& requisicoes, const std::vect
 
     double mediaNumeroProcessosFila = calculaEsperanca(retornaTemposEspecifico(eventos, &Evento::retornaNumeroElementosFila), 
                                             retornaTemposEspecifico(eventos, &Evento::retornaDelayUltimoEvento), tempoAtendimentoTotal);
-    /*std::cout << "Média tempos de chegada/taxa (Lambda e 1/Lambda): " << mediaChegadasSimulada << " " << taxaMediaChegadasSimulada << std::endl;
+    
+    #if NUM_THREADS == 1 && TAMANHO_AMOSTRA == 1
+    
+    std::cout << "Média tempos de chegada/taxa (Lambda e 1/Lambda): " << mediaChegadasSimulada << " " << taxaMediaChegadasSimulada << std::endl;
     std::cout << "Média tempos de serviços/taxa (Mi e 1/Mi): " << mediaServicosSimulada << " " << taxaMediaServicosSimulada << std::endl;
     std::cout << "Média tempos de espera (E(W)): " << mediaTempoEsperaSimulada << std::endl;
     std::cout << "Média tempos de resposta (E(T)): " << mediaTempoRespostaSimulada << std::endl;
@@ -79,7 +82,11 @@ void calculaMetricas(const std::vector<Requisicao>& requisicoes, const std::vect
 
     std::cout << "Média número de processos na fila (E(N_q)): " << mediaNumeroProcessosFila << std::endl;
 
-    std::cout << "Média número de processos na fila (E(N_q)) (Lei de Little): " << mediaChegadasSimulada * mediaTempoEsperaSimulada << std::endl;*/
+    std::cout << "Média número de processos na fila (E(N_q)) (Lei de Little): " << mediaChegadasSimulada * mediaTempoEsperaSimulada << std::endl;
+
+    std::cout << std::endl;
+
+    #endif
 
     mutexEstatisticas.lock();
 
@@ -305,11 +312,19 @@ void iniciaSimulacao(const std::unordered_map<std::string, double>& parametros, 
     std::vector<Requisicao> requisicoes = geraTemposEventos(n, taxaMediaChegada, taxaServico, eDeterministico);
     std::vector<Evento> eventos = geraEventosSimulador(n, requisicoes);
     
-    //imprimeEventos(eventos);
+    #if NUM_THREADS == 1 && TAMANHO_AMOSTRA == 1
+
+    imprimeEventos(eventos);
+
+    #endif
 
     tempoAtendimentoTotal = retornaTempoAtendimentoSistema(requisicoes);
-    //std::cout << "\n\nTempo de atendimento do sistema: " << tempoAtendimentoTotal << std::endl;
+    
+    #if NUM_THREADS == 1 && TAMANHO_AMOSTRA == 1
 
+    std::cout << "\n\nTempo de atendimento do sistema: " << tempoAtendimentoTotal << std::endl;
+
+    #endif
 
     calculaMetricas(requisicoes, eventos, tempoAtendimentoTotal);
 }

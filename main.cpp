@@ -20,11 +20,15 @@ int main(int argc, char** argv)
     else
         inicializaThreads(std::atoi(argv[1]), std::atof(argv[2]), std::atof(argv[3]), false);
     
+    #if TAMANHO_AMOSTRA != 1
+
     estatisticas.calculaVarianciasDesviosPadroesAmostrais();
     estatisticas.calculaIntervalosConfianca(1.96);
     estatisticas.imprimeAnaliseAmostral();
 
     plotaGrafico(estatisticas);
+
+    #endif
     
     return 0;
 }
