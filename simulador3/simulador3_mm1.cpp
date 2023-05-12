@@ -3,6 +3,7 @@
 #include "simulador3/simulador3_mm1.hpp"
 #include "estatistica/estatisticas.hpp"
 #include "estatistica/metricas.hpp"
+#include "thread/thread.hpp"
 
 #include <queue>
 #include <limits>

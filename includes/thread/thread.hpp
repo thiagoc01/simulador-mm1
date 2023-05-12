@@ -10,6 +10,12 @@
 
 #endif
 
+#if NUM_THREADS > TAMANHO_AMOSTRA
+
+#define NUM_THREADS 1
+
+#endif
+
 void executaSimulacoes(int numIteracoes, double taxaChegada, double taxaSaida, bool eDeterministico);
 
 void inicializaThreads(int numIteracoes, double taxaChegada, double taxaSaida, bool eDeterministico);

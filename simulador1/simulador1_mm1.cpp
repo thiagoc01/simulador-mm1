@@ -7,6 +7,7 @@
 #include "simulador_mm1.hpp"
 #include "estatistica/metricas.hpp"
 #include "estatistica/estatisticas.hpp"
+#include "thread/thread.hpp"
 
 /* Ponteiros de função para a geração de tempos de serviço de forma determínistica ou probabilística */
 

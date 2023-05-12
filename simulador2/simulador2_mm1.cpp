@@ -8,6 +8,7 @@
 #include "geracao_tempos.hpp"
 #include "estatistica/metricas.hpp"
 #include "estatistica/estatisticas.hpp"
+#include "thread/thread.hpp"
 
 struct ComparadorTemposRequisicao // Utilizado para ser a função de comparação na fila, já que queremos o menor tempo sempre.
 {

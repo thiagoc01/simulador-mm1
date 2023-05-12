@@ -111,7 +111,7 @@ simulador2_compilacao_objs: simulador2/*.cpp
 
 simulador3 : thread.o grafico.o estatisticas geracao_aleatorios simulador3_compilacao_objs simulador3_compilacao clean
 	
-simulador3_compilacao: simulador3/main.cpp
+simulador3_compilacao: main.cpp
 	$(CXX) $(OBJ3) main.cpp -o $(TARGET) $(FLAGS)
 
 simulador3_compilacao_objs: simulador3/*.cpp
