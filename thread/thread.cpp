@@ -1,20 +1,6 @@
 #include "thread/thread.hpp"
 #include "simulador_mm1.hpp"
 
-#ifdef TAMANHO_AMOSTRA
-
-#if TAMANHO_AMOSTRA <= 0 || TAMANHO_AMOSTRA > 50000
-
-#define TAMANHO_AMOSTRA 10000
-
-#endif
-
-#else
-
-#define TAMANHO_AMOSTRA 10000
-
-#endif
-
 const int tamanhoAmostra = TAMANHO_AMOSTRA; // Rodaremos 10000 vezes o simulador
 
 void executaSimulacoes(int numIteracoes, double taxaChegada, double taxaSaida, bool eDeterministico)

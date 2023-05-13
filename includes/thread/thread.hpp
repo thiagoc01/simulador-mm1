@@ -4,7 +4,21 @@
 #include <thread>
 #include <vector>
 
-#if !defined(NUM_THREADS) || defined(NUM_THREADS) && NUM_THREADS <= 0
+#ifdef TAMANHO_AMOSTRA
+
+#if TAMANHO_AMOSTRA <= 0 || TAMANHO_AMOSTRA > 50000
+
+#define TAMANHO_AMOSTRA 10000
+
+#endif
+
+#else
+
+#define TAMANHO_AMOSTRA 10000
+
+#endif
+
+#if !defined(NUM_THREADS) || (defined(NUM_THREADS) && NUM_THREADS <= 0)
 
 #define NUM_THREADS 5
 
