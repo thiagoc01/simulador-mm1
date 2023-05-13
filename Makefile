@@ -24,7 +24,7 @@ ifeq ($(OS),Windows_NT)
 	versaoPython2 = $(subst .,,$(versaoPython))
 	appDataRoaming = $(shell echo ${APPDATA})
 	appData = $(subst Roaming,\,$(appDataRoaming))
-	INCLUDEDIR1 = includes/
+	INCLUDEDIR1 = include/
 	INCLUDEDIR2 = $(appData)\Local\Programs\Python\Python$(versaoPython2)\include
 	INCLUDEDIR3 = "$(appData)\Local\Programs\Python\Python$(versaoPython2)\Lib\site-packages\numpy\core\include"
 	LIB = "$(appData)\Local\Programs\Python\Python$(versaoPython2)\libs"
@@ -52,7 +52,7 @@ else
 
 		endif
 
-		INCLUDEDIR1 = includes/
+		INCLUDEDIR1 = include/
 		INCLUDEDIR2 = /usr/include/python$(versaoPython)
 		FLAGS = -I $(INCLUDEDIR1) -I $(INCLUDEDIR2) $(NUM_THREADS2) $(TAMANHO_AMOSTRA2) -std=c++2a -lpython$(versaoPython) -lpthread -w
 
@@ -70,7 +70,7 @@ else
 
 		endif
 
-		INCLUDEDIR1 = includes/
+		INCLUDEDIR1 = include/
 		INCLUDEDIR2 = /usr/local/Cellar/python/$(versaoPython)/Frameworks/Python.framework/Versions/$(versaoPython)/include/python$(versaoPython)
 		INCLUDEDIR3 = /usr/local/lib/python$(versaoPython)/site-packages/numpy/core/include
 		LIB = /usr/local/Cellar/python/$(versaoPython)/Frameworks/Python.framework/Versions/$(versaoPython)/lib
