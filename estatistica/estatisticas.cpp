@@ -1,4 +1,4 @@
-#include "../includes/estatistica/estatisticas.hpp"
+#include "estatistica/estatisticas.hpp"
 
 #include <cmath>
 #include <iostream>
