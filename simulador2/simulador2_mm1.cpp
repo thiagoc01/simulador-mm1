@@ -35,6 +35,7 @@ typedef struct
 {
     double& tempoSimulacao;
     double& ultimoEvento;
+    double& ultimoServico;
 
     int& numPessoasFila;
     int& numPessoasSistema;
@@ -93,7 +94,7 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     #if NUM_THREADS == 1 && TAMANHO_AMOSTRA == 1
 
     std::cout << "\n\nNúmero médio de processos no sistema (E(N)): " << mediaProcessosSistema << std::endl;
-    std::cout << "Número médio de processos na fila (E(N_q)): " << mediaProcessosSistema << std::endl;     
+    std::cout << "Número médio de processos na fila (E(N_q)): " << mediaProcessosFila << std::endl;     
     std::cout << "Tempo médio no sistema (E(T)): " << tempoMedioSistema << std::endl; 
     std::cout << "Tempo médio na fila (E(W)): " << tempoMedioEspera << std::endl;
     
@@ -135,7 +136,11 @@ void trataEventoChegada(const Requisicao& cabecaFila, const double& tempoChegada
     parametros.filaRequisicoes.push(Requisicao(parametros.tempoSimulacao + tempoChegada, CHEGADA)); // Agenda uma nova chegada
 
     if (parametros.numPessoasSistema == 1) /// Se tivermos somente essa requisição, precisaremos tratá-la
+    {
+        parametros.ultimoServico = parametros.tempoSimulacao + tempoServico;
+        parametros.temposEspera.push_back(0.0);
         parametros.filaRequisicoes.push(Requisicao(parametros.tempoSimulacao + tempoServico, SAIDA)); // Agenda o tratamento dessa saída
+    }
 }
 
 void trataEventoSaida(const Requisicao& cabecaFila, const double& tempoChegada, const double& tempoServico, ParametrosSimulador& parametros)
@@ -150,7 +155,8 @@ void trataEventoSaida(const Requisicao& cabecaFila, const double& tempoChegada, 
 
     /* Guarda o tempo que a requisição aguardou. Análogo ao simulador 1. */
 
-    parametros.temposEspera.push_back(parametros.tempoSimulacao - parametros.temposChegada[parametros.temposSaida.size()]);
+    if (parametros.ultimoServico != cabecaFila.retornaTempoRequisicao())
+        parametros.temposEspera.push_back(parametros.ultimoServico - parametros.temposChegada[parametros.temposSaida.size()]);
 
     parametros.numPessoasFila--;  
 
@@ -175,6 +181,7 @@ void trataEventoSaida(const Requisicao& cabecaFila, const double& tempoChegada, 
     parametros.numPessoasSistema--; // Requisição tratada
 
     parametros.ultimoEvento = parametros.tempoSimulacao; // Informa que esse foi o último evento.
+    parametros.ultimoServico = cabecaFila.retornaTempoRequisicao();
 
     if (parametros.numPessoasSistema > 0) // Se houver mais requisições, agenda os tratamentos delas.
         parametros.filaRequisicoes.push(Requisicao(parametros.tempoSimulacao + tempoServico, SAIDA));
@@ -196,6 +203,7 @@ void simulaFilaMM1(int numIteracoes, double mediaChegada, double mediaServico, b
 {
     double tempoSimulacao = 0.0;
     double ultimoEvento = 0.0;
+    double ultimoServico = 0.0;
 
     int numPessoasFila = 0;
     int numPessoasSistema = 0;
@@ -215,6 +223,7 @@ void simulaFilaMM1(int numIteracoes, double mediaChegada, double mediaServico, b
     {
         .tempoSimulacao = tempoSimulacao,
         .ultimoEvento = ultimoEvento,
+        .ultimoServico = ultimoServico,
         .numPessoasFila = numPessoasFila,
         .numPessoasSistema = numPessoasSistema,
         .numeroProcessosSistemaPeriodo = numeroProcessosSistemaPeriodo,
