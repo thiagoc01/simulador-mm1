@@ -137,7 +137,8 @@ void trataEventoChegada(const Requisicao& cabecaFila, const double& tempoChegada
 
     if (parametros.numPessoasSistema == 1) /// Se tivermos somente essa requisição, precisaremos tratá-la
     {
-        parametros.ultimoServico = parametros.tempoSimulacao + tempoServico;
+        parametros.ultimoServico = parametros.tempoSimulacao + tempoServico; // Marcamos que esse foi o último serviço
+        parametros.numPessoasFila--; // A pessoa já foi atendida, retiramos da fila.
         parametros.temposEspera.push_back(0.0);
         parametros.filaRequisicoes.push(Requisicao(parametros.tempoSimulacao + tempoServico, SAIDA)); // Agenda o tratamento dessa saída
     }
@@ -145,23 +146,18 @@ void trataEventoChegada(const Requisicao& cabecaFila, const double& tempoChegada
 
 void trataEventoSaida(const Requisicao& cabecaFila, const double& tempoChegada, const double& tempoServico, ParametrosSimulador& parametros)
 {
-    /* Análogo ao do evento da chegada */
-
-    parametros.numeroProcessosFilaPeriodo.push_back({parametros.tempoSimulacao - parametros.ultimoEvento, parametros.numPessoasFila});
-
-    /* Quando a requisição entrar em serviço, o período em que ela ficou no sistema indica que houve a quantidade de pessoas na fila menos essa requisição */
-
-    parametros.numeroProcessosFilaPeriodo.push_back({cabecaFila.retornaTempoRequisicao() - parametros.tempoSimulacao, parametros.numPessoasFila - 1});
-
     /* Guarda o tempo que a requisição aguardou. Análogo ao simulador 1. */
 
-    if (parametros.ultimoServico != cabecaFila.retornaTempoRequisicao())
+    if (parametros.ultimoServico != cabecaFila.retornaTempoRequisicao()) // O tempo de espera para o caso da requisição que chega é atendida já foi calculada
         parametros.temposEspera.push_back(parametros.ultimoServico - parametros.temposChegada[parametros.temposSaida.size()]);
-
-    parametros.numPessoasFila--;  
 
     parametros.tempoSimulacao = cabecaFila.retornaTempoRequisicao(); // Atualiza o tempo para esse evento
 
+    parametros.numeroProcessosFilaPeriodo.push_back({parametros.tempoSimulacao - parametros.ultimoEvento, parametros.numPessoasFila});
+
+    if (parametros.numPessoasFila > 0) // Uma nova pessoa será atendida se estiver na fila
+        parametros.numPessoasFila--;  
+        
     parametros.temposSaida.push_back(parametros.tempoSimulacao); // Guarda o tempo de saída
 
     /* Guarda o tempo que a requisição ficou no sistema. Análogo ao simulador 1. */
