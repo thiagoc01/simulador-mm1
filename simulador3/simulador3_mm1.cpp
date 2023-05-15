@@ -120,10 +120,10 @@ void imprimeEventos(const std::vector<Evento>& eventos)
 }
 
 //Função que gera os valores determinísticos de tempo de serviço
-static double (*geraTempoServicoDeterministico)(double mediaServico) = [](double mediaServico){return mediaServico; };
+static double (*geraTempoServicoDeterministico)(double taxaServico) = [](double taxaServico){return 1.0 / taxaServico; };
 
 //Função que gera os valores probabilísticos de tempo de serviço com base em uma distribuição exponencial, cuja média é passada por parâmetro
-static double (*geraTempoServicoProbabilistico)(double mediaServico) = [](double mediaServico){return retornaTempoExponencial(mediaServico); };
+static double (*geraTempoServicoProbabilistico)(double taxaServico) = [](double taxaServico){return retornaTempoExponencial(taxaServico); };
 
 //Gera o tempo dos eventos baseado nos parâmetros lambda (média de chegadas) e beta (média de tempo de serviço), além da
 //variável booleana que decide se o tempo de serviço usado será probabilístico ou determinístico. 
@@ -306,8 +306,8 @@ std::vector<Evento> geraEventosSimulador(const int& n, const std::vector<Requisi
 void iniciaSimulacao(const std::unordered_map<std::string, double>& parametros, const bool& eDeterministico)
 {
     int n = static_cast<int>(parametros.find("n")->second);
-    double taxaMediaChegada = parametros.find("mediaChegada")->second;
-    double taxaServico = parametros.find("mediaServico")->second;
+    double taxaMediaChegada = parametros.find("taxaChegada")->second;
+    double taxaServico = parametros.find("taxaServico")->second;
     double tempoAtendimentoTotal;
 
     std::vector<Requisicao> requisicoes = geraTemposEventos(n, taxaMediaChegada, taxaServico, eDeterministico);

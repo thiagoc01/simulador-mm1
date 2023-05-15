@@ -20,8 +20,8 @@ struct ComparadorTemposRequisicao // Utilizado para ser a função de comparaç�
 
 /* Ponteiros de função para o caso determínistico e probabilístico */
 
-static double (*geraTempoServicoDeterministico)(double mediaServico) = [](double mediaServico){return mediaServico; };
-static double (*geraTempoServicoProbabilistico)(double mediaServico) = [](double mediaServico){return retornaTempoExponencial(mediaServico); };
+static double (*geraTempoServicoDeterministico)(double taxaServico) = [](double taxaServico){return 1.0 / taxaServico; };
+static double (*geraTempoServicoProbabilistico)(double taxaServico) = [](double taxaServico){return retornaTempoExponencial(taxaServico); };
 
 static std::mutex mutexEstatisticas; // Mutex para acesso concorrente das threads ao objeto estatisticas
 
@@ -195,7 +195,7 @@ void atualizaSistema(const double& tempoChegada, const double& tempoServico, Par
         trataEventoSaida(cabecaFila, tempoChegada, tempoServico, parametros);
 }
 
-void simulaFilaMM1(int numIteracoes, double mediaChegada, double mediaServico, bool eDeterministico)
+void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, bool eDeterministico)
 {
     double tempoSimulacao = 0.0;
     double ultimoEvento = 0.0;
@@ -231,15 +231,15 @@ void simulaFilaMM1(int numIteracoes, double mediaChegada, double mediaServico, b
         .filaRequisicoes = filaRequisicoes
     };
 
-    double (*geraTempoServico)(double mediaServico); // Ponteiro de função para tornar o simulador genérico a determinismo
+    double (*geraTempoServico)(double taxaServico); // Ponteiro de função para tornar o simulador genérico a determinismo
 
     if (eDeterministico)
         geraTempoServico = geraTempoServicoDeterministico;
     else
         geraTempoServico = geraTempoServicoProbabilistico;
 
-    double tempoChegada = retornaTempoPoisson(1.0 / mediaChegada);
-    double tempoServico = geraTempoServico(1.0 / mediaServico);
+    double tempoChegada = retornaTempoPoisson(taxaChegada);
+    double tempoServico = geraTempoServico(taxaServico);
 
     Requisicao requisicao = Requisicao(tempoChegada, CHEGADA); // Gera a primeira requisição
 
@@ -247,8 +247,8 @@ void simulaFilaMM1(int numIteracoes, double mediaChegada, double mediaServico, b
 
     for (int i = 0 ; i < numIteracoes && !parametros.filaRequisicoes.empty() ; i++)
     {
-        tempoChegada = retornaTempoPoisson(1.0 / mediaChegada);
-        tempoServico = geraTempoServico(1.0 / mediaServico);
+        tempoChegada = retornaTempoPoisson(taxaChegada);
+        tempoServico = geraTempoServico(taxaServico);
 
         atualizaSistema(tempoChegada, tempoServico, parametros);
     }

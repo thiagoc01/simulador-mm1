@@ -11,8 +11,8 @@
 
 /* Ponteiros de função para a geração de tempos de serviço de forma determínistica ou probabilística */
 
-static double (*geraTempoServicoDeterministico)(double mediaServico) = [](double mediaServico){return mediaServico; };
-static double (*geraTempoServicoProbabilistico)(double mediaServico) = [](double mediaServico){return retornaTempoExponencial(mediaServico); };
+static double (*geraTempoServicoDeterministico)(double taxaServico) = [](double taxaServico){return 1.0 / taxaServico; };
+static double (*geraTempoServicoProbabilistico)(double taxaServico) = [](double taxaServico){return retornaTempoExponencial(taxaServico); };
 
 static std::mutex mutexEstatisticas; // Mutex para acesso concorrente das threads ao objeto estatisticas
 
@@ -167,7 +167,7 @@ void atualizaSistema(const double& tempoChegada, const double& tempoSaida, Param
 }
 
 /* Função que recebe o λ, o μ e o número de iterações do simulador e roda o simulador do tipo M/M/1 */
-void simulaFilaMM1(int numIteracoes, double mediaChegada, double mediaServico, bool eDeterminismo)
+void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, bool eDeterminismo)
 {
     int numProcessosSistema = 0;
     int numProcessosFila = 0;
@@ -196,7 +196,7 @@ void simulaFilaMM1(int numIteracoes, double mediaChegada, double mediaServico, b
         .temposEspera = temposEspera
     };
 
-    double (*geraTempoServico)(double mediaServico);
+    double (*geraTempoServico)(double taxaServico);
 
     if (eDeterminismo)
         geraTempoServico = geraTempoServicoDeterministico;
@@ -208,8 +208,8 @@ void simulaFilaMM1(int numIteracoes, double mediaChegada, double mediaServico, b
     for (int i = 0 ; i < numIteracoes ; i++)
     {
         /* Gera um tempo de chegada com distribuição de Poisson e um tempo de serviço pela distribuição Exponencial */
-        double tempoChegada = retornaTempoPoisson(1.0 / mediaChegada);
-        double tempoSaida = geraTempoServico(1.0 / mediaServico);
+        double tempoChegada = retornaTempoPoisson(taxaChegada);
+        double tempoSaida = geraTempoServico(taxaServico);
         
         /* Faz a atualização dos tempos para a próxima iteração */
         atualizaSistema(tempoChegada, tempoSaida, parametros);     
