@@ -181,12 +181,14 @@ std::unordered_map<std::string, double> Estatisticas::retornaIntervaloConfiancaT
     return this->intervaloConfiancaTempoFila;
 }
 
-void Estatisticas::imprimeAnaliseAmostral()
+void Estatisticas::imprimeAnaliseAmostral(const double& taxaChegada, const double& taxaServico)
 {
     std::cout << "Média amostral de processos no sistema (E(N)): " << this->retornaNumeroMedioProcessosSistema() << std::endl;
     std::cout << "Média amostral de processos na fila (E(N_q)): " << this->retornaNumeroMedioFilaSistema() << std::endl;     
     std::cout << "Média amostral de tempo no sistema (E(T)): " << this->retornaTempoMedioSistema() << std::endl; 
     std::cout << "Média amostral de tempo na fila (E(W)): " << this->retornaTempoMedioFila() << std::endl;
+
+    std::cout << "\nComparativo E(T) médio simulado x E(T) analítico: " << this->retornaTempoMedioSistema() << " " << (1 / taxaServico) / (1 - (taxaChegada / taxaServico)) << std::endl;
 
     std::cout << "\nVariância amostral de processos no sistema (E(N)): " << this->retornaVarianciaProcessosSistema() << std::endl;
     std::cout << "Variância amostral de processos na fila (E(N_q)): " << this->retornaVarianciaFilaSistema() << std::endl;     
@@ -213,6 +215,8 @@ void Estatisticas::imprimeAnaliseAmostral()
     intervalo = this->retornaIntervaloConfiancaTempoFila();
 
     std::cout << "Intervalo de confiança de tempo na fila (E(W)): [" << intervalo["inferior"] << ", " << intervalo["superior"]<< "]" << std::endl;
+
+    
 }
 
 std::vector<Metricas> Estatisticas::retornaMetricas() const

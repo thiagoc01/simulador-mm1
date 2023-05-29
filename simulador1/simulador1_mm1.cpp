@@ -41,7 +41,7 @@ typedef struct
 
 Estatisticas estatisticas; // Objeto para guardar as métricas para criarmos uma amostra
 
-void calculaMetricas(const ParametrosSimulador& parametros)
+void calculaMetricas(const ParametrosSimulador& parametros, const double& taxaChegada, const double& taxaServico)
 {
     double tempoSistemaRespostaMedia; // Armazena E(T)
     double tempoSistemaEsperaMedia; // Armazena E(W)
@@ -92,6 +92,7 @@ void calculaMetricas(const ParametrosSimulador& parametros)
     std::cout << "Número médio de processos na fila (E(N_q)): " << numProcessosFilaTotal / parametros.tempoSimulacao << std::endl;
     std::cout << "Tempo médio no sistema (E(T)): " <<  tempoSistemaRespostaMedia << std::endl;
     std::cout << "Tempo médio na fila (E(W)): " <<  tempoSistemaEsperaMedia << std::endl;
+    std::cout << "Comparativo E(T) simulado x E(T) analítico: " << tempoSistemaRespostaMedia << " " << (1 / taxaServico) / (1 - (taxaChegada / taxaServico)) << std::endl;
     std::cout << std::endl;
 
     #endif
@@ -216,5 +217,5 @@ void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, boo
     }
     
     /* Função que calcula o número de processos na fila, no sistema e a o tempo médio na fila e no sistema */
-    calculaMetricas(parametros);  
+    calculaMetricas(parametros, taxaChegada, taxaServico);  
 }

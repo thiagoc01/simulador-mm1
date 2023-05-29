@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 
     estatisticas.calculaVarianciasDesviosPadroesAmostrais();
     estatisticas.calculaIntervalosConfianca(1.96);
-    estatisticas.imprimeAnaliseAmostral();
+    estatisticas.imprimeAnaliseAmostral(std::atof(argv[2]), std::atof(argv[3]));
 
     plotaGrafico(estatisticas);
 

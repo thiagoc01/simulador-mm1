@@ -72,7 +72,7 @@ double retornaSomaPessoas(const std::vector<std::pair<double, int>>& numeroProce
 /* Calcula todas as métricas desejadas: E(N), E(N_q), E(W) e E(T) */
 
 void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosSistemaPeriodo,
-                    const std::vector<std::pair<double, int>>& numeroProcessosFilaPeriodo, const ParametrosSimulador& parametros)
+                    const std::vector<std::pair<double, int>>& numeroProcessosFilaPeriodo, const ParametrosSimulador& parametros, const double& taxaChegada, const double& taxaServico)
 {
     double mediaProcessosSistema = retornaSomaPessoas(numeroProcessosSistemaPeriodo) / parametros.tempoSimulacao;
     double mediaProcessosFila = retornaSomaPessoas(numeroProcessosFilaPeriodo) / parametros.tempoSimulacao;
@@ -97,7 +97,7 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     std::cout << "Número médio de processos na fila (E(N_q)): " << mediaProcessosFila << std::endl;     
     std::cout << "Tempo médio no sistema (E(T)): " << tempoMedioSistema << std::endl; 
     std::cout << "Tempo médio na fila (E(W)): " << tempoMedioEspera << std::endl;
-    
+    std::cout << "Comparativo E(T) simulado x E(T) analítico: " << tempoMedioSistema << " " << (1 / taxaServico) / (1 - (taxaChegada / taxaServico)) << std::endl;
     std::cout << std::endl;
 
     #endif
@@ -255,6 +255,6 @@ void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, boo
 
     /* Calcula as métricas dessa amostra */
 
-    calculaMetricas(parametros.numeroProcessosSistemaPeriodo, parametros.numeroProcessosFilaPeriodo, parametros);
+    calculaMetricas(parametros.numeroProcessosSistemaPeriodo, parametros.numeroProcessosFilaPeriodo, parametros, taxaChegada, taxaServico);
 }
             

@@ -79,7 +79,7 @@ class Estatisticas
 
         std::unordered_map<std::string, double> retornaIntervaloConfiancaTempoFila() const;
 
-        void imprimeAnaliseAmostral();
+        void imprimeAnaliseAmostral(const double& taxaChegada, const double& taxaServico);
 };
 
 #endif
