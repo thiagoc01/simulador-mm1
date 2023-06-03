@@ -1,13 +1,14 @@
 #include "estatistica/metricas.hpp"
 
 Metricas::Metricas(double numeroMedioProcessosSistema, double numeroMedioFilaSistema,
-                        double tempoMedioSistema, double tempoMedioFila, double periodoOcupadoGeneralizadoMedio)
+                        double tempoMedioSistema, double tempoMedioFila, double periodoOcupadoGeneralizadoMedio, double tempoMedioUmCliente)
 {
     this->numeroMedioProcessosSistema = numeroMedioProcessosSistema;
     this->numeroMedioFilaSistema = numeroMedioFilaSistema;
     this->tempoMedioSistema = tempoMedioSistema;
     this->tempoMedioFila = tempoMedioFila;
     this->periodoOcupadoGeneralizadoMedio = periodoOcupadoGeneralizadoMedio;
+    this->tempoMedioUmCliente = tempoMedioUmCliente;
 }
 
 double Metricas::retornaNumeroMedioProcessosSistema() const
@@ -33,4 +34,9 @@ double Metricas::retornaTempoMedioFila() const
 double Metricas::retornaPeriodoOcupadoGeneralizadoMedio() const
 {
     return this->periodoOcupadoGeneralizadoMedio;
+}
+
+double Metricas::retornaTempoMedioUmCliente() const
+{
+    return this->tempoMedioUmCliente;
 }

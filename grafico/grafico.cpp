@@ -31,7 +31,13 @@ void plotaGrafico(const Estatisticas &estatisticas)
     std::vector<double> numerosMediosProcessosFila;
     std::vector<double> temposMediosProcessosSistema;
     std::vector<double> temposMediosProcessosFila;
+    std::vector<double> temposMediosUmCliente;
+
+    #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
+
     std::vector<double> periodosOcupadosGeneralizadosMedios;
+
+    #endif
 
     std::array<std::string, 3> legendas;
 
@@ -41,7 +47,13 @@ void plotaGrafico(const Estatisticas &estatisticas)
         numerosMediosProcessosFila.push_back(amostra.retornaNumeroMedioFilaSistema());
         temposMediosProcessosSistema.push_back(amostra.retornaTempoMedioSistema());
         temposMediosProcessosFila.push_back(amostra.retornaTempoMedioFila());
+
+        #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
+
         periodosOcupadosGeneralizadosMedios.push_back(amostra.retornaPeriodoOcupadoGeneralizadoMedio());
+        temposMediosUmCliente.push_back(amostra.retornaTempoMedioUmCliente());
+
+        #endif
     }
 
     legendas[0] = "Número médio de processos no sistema";
@@ -65,8 +77,17 @@ void plotaGrafico(const Estatisticas &estatisticas)
 
     realizaAcoesPlotagem(temposMediosProcessosFila, estatisticas.retornaTempoMedioFila(), legendas);
 
+    #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
+
     legendas[0] = "Período ocupado generalizado médio";
     legendas[2] = "Histograma do período ocupado generalizado médio";
 
     realizaAcoesPlotagem(periodosOcupadosGeneralizadosMedios, estatisticas.retornaPeriodoOcupadoGeneralizadoMedio(), legendas);
+
+    legendas[0] = "Tempo médio até atingir um cliente dado C clientes";
+    legendas[2] = "Histograma do tempo médio até atingir um cliente";
+
+    realizaAcoesPlotagem(temposMediosUmCliente, estatisticas.retornaTempoMedioUmCliente(), legendas);
+
+    #endif
 }

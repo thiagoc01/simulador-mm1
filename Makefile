@@ -8,6 +8,10 @@ ifdef TAMANHO_AMOSTRA
 	override TAMANHO_AMOSTRA2 = -D TAMANHO_AMOSTRA=$(AUX2)
 endif
 
+ifdef PERIODO_OCUPADO_GENERALIZADO
+	DEFINE_PERIODO = -D CALCULAR_PERIODO_OCUPADO_GENERALIZADO
+endif
+
 ifeq ($(OS),Windows_NT)
 	versaoPythonLista = $(subst ., ,$(filter-out Python , $(shell python --version)))
 
@@ -28,13 +32,13 @@ ifeq ($(OS),Windows_NT)
 	INCLUDEDIR2 = $(appData)\Local\Programs\Python\Python$(versaoPython2)\include
 	INCLUDEDIR3 = "$(appData)\Local\Programs\Python\Python$(versaoPython2)\Lib\site-packages\numpy\core\include"
 	LIB = "$(appData)\Local\Programs\Python\Python$(versaoPython2)\libs"
-	FLAGS = -I $(INCLUDEDIR1) -I "$(INCLUDEDIR2)" -I $(INCLUDEDIR3) -L $(LIB) $(NUM_THREADS2) $(TAMANHO_AMOSTRA2) -std=c++2a -lpython$(versaoPython2) -lpthread -w
+	FLAGS = -I $(INCLUDEDIR1) -I "$(INCLUDEDIR2)" -I $(INCLUDEDIR3) -L $(LIB) $(NUM_THREADS2) $(TAMANHO_AMOSTRA2) -std=c++2a -lpython$(versaoPython2) -lpthread -w $(DEFINE_PERIODO)
 
 	ifeq ("$(wildcard $(INCLUDEDIR2))", "")
 		INCLUDEDIR2 = "$(appData)\Local\Programs\Python\Python$(versaoPython)\include"
 		INCLUDEDIR3 = "$(appData)\Local\Programs\Python\Python$(versaoPython)\Lib\site-packages\numpy\core\include"
 		LIB = "$(appData)\Local\Programs\Python\Python$(versaoPython)\libs"
-		FLAGS = -I $(INCLUDEDIR1) -I $(INCLUDEDIR2) -I $(INCLUDEDIR3) -L $(LIB) $(NUM_THREADS2) $(TAMANHO_AMOSTRA2) -std=c++2a -lpython$(versaoPython) -lpthread -w
+		FLAGS = -I $(INCLUDEDIR1) -I $(INCLUDEDIR2) -I $(INCLUDEDIR3) -L $(LIB) $(NUM_THREADS2) $(TAMANHO_AMOSTRA2) -std=c++2a -lpython$(versaoPython) -lpthread -w $(DEFINE_PERIODO)
 	endif
 		
 else
@@ -54,7 +58,7 @@ else
 
 		INCLUDEDIR1 = include/
 		INCLUDEDIR2 = /usr/include/python$(versaoPython)
-		FLAGS = -I $(INCLUDEDIR1) -I $(INCLUDEDIR2) $(NUM_THREADS2) $(TAMANHO_AMOSTRA2) -std=c++2a -lpython$(versaoPython) -lpthread -w
+		FLAGS = -I $(INCLUDEDIR1) -I $(INCLUDEDIR2) $(NUM_THREADS2) $(TAMANHO_AMOSTRA2) -std=c++2a -lpython$(versaoPython) -lpthread -w $(DEFINE_PERIODO)
 
 	else
 
@@ -74,7 +78,7 @@ else
 		INCLUDEDIR2 = /usr/local/Cellar/python/$(versaoPython)/Frameworks/Python.framework/Versions/$(versaoPython)/include/python$(versaoPython)
 		INCLUDEDIR3 = /usr/local/lib/python$(versaoPython)/site-packages/numpy/core/include
 		LIB = /usr/local/Cellar/python/$(versaoPython)/Frameworks/Python.framework/Versions/$(versaoPython)/lib
-		FLAGS = -I $(INCLUDEDIR1) -I $(INCLUDEDIR2) -I $(INCLUDEDIR3) -L $(LIB) $(NUM_THREADS2) $(TAMANHO_AMOSTRA2) -std=c++2a -lpython$(versaoPython) -lpthread -w
+		FLAGS = -I $(INCLUDEDIR1) -I $(INCLUDEDIR2) -I $(INCLUDEDIR3) -L $(LIB) $(NUM_THREADS2) $(TAMANHO_AMOSTRA2) -std=c++2a -lpython$(versaoPython) -lpthread -w $(DEFINE_PERIODO)
 		
 	endif
 
@@ -101,7 +105,6 @@ else
 	$(info "Necessário g++ na versão 10 ou superior.")
 	exit 1
 endif
-
 
 simulador1 : teste_g++ thread.o grafico.o estatisticas geracao_aleatorios simulador1_compilacao_objs simulador1_compilacao clean
 	

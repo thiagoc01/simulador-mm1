@@ -10,6 +10,8 @@
 #include "estatistica/estatisticas.hpp"
 #include "thread/thread.hpp"
 
+extern int numClientes; // Definido em main.cpp
+
 struct ComparadorTemposRequisicao // Utilizado para ser a função de comparação na fila, já que queremos o menor tempo sempre.
 {
     bool operator()(Requisicao& r1, Requisicao& r2)
@@ -36,11 +38,21 @@ typedef struct
     double& tempoSimulacao;
     double& ultimoEvento;
     double& ultimoServico;
-    double& inicioClientes; // |Guarda o tempo de início do período ocupado generalizado atual
+
+    #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
+
+    double& inicioClientes; // Guarda o tempo de início do período ocupado generalizado atual
+
+    #endif
 
     int& numPessoasFila;
     int& numPessoasSistema;
+
+    #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
+
     bool& analisandoFila; // Se true, a contagem do período ocupado generalizado foi iniciada
+
+    #endif
 
     std::vector<std::pair<double, int>>& numeroProcessosSistemaPeriodo; // Quantidade de processos no sistema em um período de tempo
     std::vector<std::pair<double, int>>& numeroProcessosFilaPeriodo; // Quantidade de processos na fila em um período de tempo
@@ -48,7 +60,13 @@ typedef struct
     std::vector<double>& temposSaida; // Análogo ao anterior para a saída
     std::vector<double>& temposSistema; // Tempo de serviço mais tempo na fila
     std::vector<double>& temposEspera; // Análogo ao anterior, porém somente na fila
+
+    #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
+
     std::vector<double>& temposPeriodosOcupadosGeneralizados; // Guarda os períodos ocupados generalizados
+
+    #endif
+
     std::priority_queue<Requisicao, std::vector<Requisicao>, ComparadorTemposRequisicao>& filaRequisicoes; // Fila com as requisições
 
 } ParametrosSimulador;
@@ -95,28 +113,45 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     else
         tempoMedioEspera = std::accumulate(parametros.temposEspera.begin(), parametros.temposEspera.end(), 0.0) / parametros.temposEspera.size();
 
+    #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
+
     if (parametros.temposPeriodosOcupadosGeneralizados.empty())
         tempoMedioPeriodoOcupadoGeneralizado = 0.0;
 
     else
         tempoMedioPeriodoOcupadoGeneralizado = std::accumulate(parametros.temposPeriodosOcupadosGeneralizados.begin(),
                     parametros.temposPeriodosOcupadosGeneralizados.end(), 0.0) / parametros.temposPeriodosOcupadosGeneralizados.size();
+
+    #endif
     
     #if NUM_THREADS == 1 && TAMANHO_AMOSTRA == 1
+
+    double tempoMedioPeriodoOcupadoAnalitico = (1 / taxaServico) / (1 - (taxaChegada / taxaServico));
 
     std::cout << "\n\nNúmero médio de processos no sistema (E(N)): " << mediaProcessosSistema << std::endl;
     std::cout << "Número médio de processos na fila (E(N_q)): " << mediaProcessosFila << std::endl;     
     std::cout << "Tempo médio no sistema (E(T)): " << tempoMedioSistema << std::endl; 
     std::cout << "Tempo médio na fila (E(W)): " << tempoMedioEspera << std::endl;
-    std::cout << "Comparativo E(T) simulado (Período ocupado) x E(T) analítico: " << tempoMedioSistema << " " << (1 / taxaServico) / (1 - (taxaChegada / taxaServico)) << std::endl;
-    std::cout << "Comparativo E(B_C) simulado (Período ocupado generalizado) x C * E(T) analítico " << tempoMedioPeriodoOcupadoGeneralizado << " " << 10 * (1 / taxaServico) / (1 - (taxaChegada / taxaServico)) << std::endl;
+    std::cout << "Comparativo E(T) simulado (Período ocupado) x E(T) analítico: " << tempoMedioSistema << " " << tempoMedioPeriodoOcupadoAnalitico << std::endl;
+
+    #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
+
+    double tempoMedioPeriodoOcupadoGeneralizadoAnalitico = numClientes * tempoMedioPeriodoOcupadoAnalitico;
+
+    std::cout << "Comparativo E(B_C) simulado (Período ocupado generalizado) x C * E(T) analítico " << tempoMedioPeriodoOcupadoGeneralizado << " " << tempoMedioPeriodoOcupadoGeneralizadoAnalitico << std::endl;
+    std::cout << "Comparativo E(U_C) simulado vs E(U_C) analítico: " << tempoMedioPeriodoOcupadoGeneralizado - tempoMedioSistema <<
+                 " " << numClientes * tempoMedioPeriodoOcupadoAnalitico - tempoMedioPeriodoOcupadoAnalitico << std::endl;
+
+    #endif
+
     std::cout << std::endl;
 
     #endif
 
     mutexEstatisticas.lock();
 
-    estatisticas.adicionaAmostra(Metricas(mediaProcessosSistema, mediaProcessosFila, tempoMedioSistema, tempoMedioEspera, tempoMedioPeriodoOcupadoGeneralizado));
+    estatisticas.adicionaAmostra(Metricas(mediaProcessosSistema, mediaProcessosFila, tempoMedioSistema,
+                        tempoMedioEspera, tempoMedioPeriodoOcupadoGeneralizado, tempoMedioPeriodoOcupadoGeneralizado - tempoMedioSistema));
 
     mutexEstatisticas.unlock();
 }
@@ -143,13 +178,17 @@ void trataEventoChegada(const Requisicao& cabecaFila, const double& tempoChegada
     parametros.numPessoasSistema++;
     parametros.numPessoasFila++;
 
-    /* Há C clientes no sistema, começamos a contagem do período ocupado generalizado */
+    #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
-    if (parametros.numPessoasSistema == 10 && !parametros.analisandoFila)
+    /* Há C clientes no sistema, começamos a contagem do período ocupado generalizado */    
+
+    if (parametros.numPessoasSistema == numClientes && !parametros.analisandoFila)
     {
         parametros.analisandoFila = true;
         parametros.inicioClientes = parametros.tempoSimulacao;
-    }
+    }    
+
+    #endif
 
     parametros.ultimoEvento = parametros.tempoSimulacao; // Guarda que esse foi o último evento
 
@@ -196,13 +235,17 @@ void trataEventoSaida(const Requisicao& cabecaFila, const double& tempoChegada, 
     
     parametros.numPessoasSistema--; // Requisição tratada
 
+    #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
+
     /* Todos foram atendidos, encerramos a contagem e colocamos o timestamp na memória */
-    
+
     if (parametros.numPessoasSistema == 0 && parametros.analisandoFila)
     {
         parametros.analisandoFila = false;
         parametros.temposPeriodosOcupadosGeneralizados.push_back(parametros.tempoSimulacao - parametros.inicioClientes);
     }
+
+    #endif
 
     parametros.ultimoEvento = parametros.tempoSimulacao; // Informa que esse foi o último evento.
     parametros.ultimoServico = cabecaFila.retornaTempoRequisicao();
@@ -232,6 +275,7 @@ void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, boo
 
     int numPessoasFila = 0;
     int numPessoasSistema = 0;
+
     bool analisandoFila = false;
 
     std::vector<std::pair<double, int>> numeroProcessosSistemaPeriodo;
@@ -251,17 +295,34 @@ void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, boo
         .tempoSimulacao = tempoSimulacao,
         .ultimoEvento = ultimoEvento,
         .ultimoServico = ultimoServico,
+
+        #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
+
         .inicioClientes = inicioClientes,
+
+        #endif
         .numPessoasFila = numPessoasFila,
         .numPessoasSistema = numPessoasSistema,
+
+        #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
+
         .analisandoFila = analisandoFila,
+
+        #endif
+
         .numeroProcessosSistemaPeriodo = numeroProcessosSistemaPeriodo,
         .numeroProcessosFilaPeriodo = numeroProcessosFilaPeriodo,
         .temposChegada = temposChegada,
         .temposSaida = temposSaida,
         .temposSistema = temposSistema,
         .temposEspera = temposEspera,
+
+        #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
+
         .temposPeriodosOcupadosGeneralizados = temposPeriodosOcupadosGeneralizados,
+
+        #endif
+        
         .filaRequisicoes = filaRequisicoes
     };
 

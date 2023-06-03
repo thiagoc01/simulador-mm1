@@ -12,11 +12,12 @@ class Metricas
         double tempoMedioSistema;
         double tempoMedioFila;
         double periodoOcupadoGeneralizadoMedio;
+        double tempoMedioUmCliente;
 
     public:
 
         Metricas(double numeroMedioProcessosSistema, double numeroMedioFilaSistema,
-                        double tempoMedioSistema, double tempoMedioFila, double periodoOcupadoGeneralizadoMedio);
+                        double tempoMedioSistema, double tempoMedioFila, double periodoOcupadoGeneralizadoMedio, double tempoMedioUmCliente);
 
         double retornaNumeroMedioProcessosSistema() const;
 
@@ -27,6 +28,8 @@ class Metricas
         double retornaTempoMedioFila() const;
 
         double retornaPeriodoOcupadoGeneralizadoMedio() const;
+
+        double retornaTempoMedioUmCliente() const;
 };
 
 #endif

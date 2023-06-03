@@ -21,18 +21,21 @@ class Estatisticas
         double tempoMedioSistema;
         double tempoMedioFila;
         double periodoOcupadoGeneralizadoMedio;
+        double tempoMedioUmCliente;
 
         double varianciaProcessosSistema;
         double varianciaFilaSistema;
         double varianciaTempoSistema;
         double varianciaTempoFila;
         double varianciaPeriodoOcupadoGeneralizadoMedio;
+        double varianciaTempoMedioUmCliente;
 
         double desvioPadraoProcessosSistema;
         double desvioPadraoFilaSistema;
         double desvioPadraoTempoSistema;
         double desvioPadraoTempoFila;
         double desvioPadraoPeriodoOcupadoGeneralizadoMedio;
+        double desvioPadraoTempoMedioUmCliente;
         
         /* As strings são "inferior" e "superior" para acessarmos os valores. */
         
@@ -41,6 +44,7 @@ class Estatisticas
         std::unordered_map<std::string, double> intervaloConfiancaTempoSistema;
         std::unordered_map<std::string, double> intervaloConfiancaTempoFila;
         std::unordered_map<std::string, double> intervaloConfiancaPeriodoOcupadoGeneralizadoMedio;
+        std::unordered_map<std::string, double> intervaloConfiancaTempoMedioUmCliente;
 
     public:
         void adicionaAmostra(const Metricas& amostra);
@@ -61,6 +65,8 @@ class Estatisticas
 
         double retornaPeriodoOcupadoGeneralizadoMedio() const;
 
+        double retornaTempoMedioUmCliente() const;
+
         double retornaVarianciaProcessosSistema() const;
 
         double retornaVarianciaFilaSistema() const;
@@ -70,6 +76,8 @@ class Estatisticas
         double retornaVarianciaTempoFila() const;
 
         double retornaVarianciaPeriodoOcupadoGeneralizadoMedio() const;
+
+        double retornaVarianciaTempoMedioUmCliente() const;
 
         double retornaDesvioPadraoProcessosSistema() const;
 
@@ -81,6 +89,8 @@ class Estatisticas
 
         double retornaDesvioPadraoPeriodoOcupadoGeneralizadoMedio() const;
 
+        double retornaDesvioPadraoTempoMedioUmCliente() const;
+
         std::unordered_map<std::string, double> retornaIntervaloConfiancaProcessosSistema() const;
 
         std::unordered_map<std::string, double> retornaIntervaloConfiancaFilaSistema() const;
@@ -90,6 +100,8 @@ class Estatisticas
         std::unordered_map<std::string, double> retornaIntervaloConfiancaTempoFila() const;
 
         std::unordered_map<std::string, double> retornaIntervaloConfiancaPeriodoOcupadoGeneralizadoMedio() const;
+
+        std::unordered_map<std::string, double> retornaIntervaloConfiancaTempoMedioUmCliente() const;
 
         void imprimeAnaliseAmostral(const double& taxaChegada, const double& taxaServico);
 };
