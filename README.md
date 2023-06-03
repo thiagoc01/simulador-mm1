@@ -26,6 +26,11 @@ Cada simulador recebe três parâmetros: a taxa de chegada $\lambda$, a taxa de 
 
 Se o tamanho da amostra for 1, as estatísticas não são exibidas, porém os eventos de uma execução que serão, assim como as métricas daquela execução.
 
+Se compilar definindo a variável PERIODO_OCUPADO_GENERALIZADO, o simulador irá exibir, seguindo o mesmo padrão das métricas acima:
+
+- E($B_C$): Período ocupado generalizado médio para C clientes;
+- E($U_C$): Tempo médio até a fila atingir 1 cliente dado que iniciou com C clientes.
+
 <br>
 
 # Como utilizar?
@@ -39,7 +44,7 @@ $ git clone https://github.com/thiagoc01/simulador-mm1.git
 Compile o simulador desejado:
 
 ```shell
-$ make simulador<simulador desejado> [TAMANHO_AMOSTRA=<Número natural>] [NUM_THREADS=<Número natural>]
+$ make simulador<simulador desejado> [TAMANHO_AMOSTRA=<Número natural>] [NUM_THREADS=<Número natural>] [PERIODO_OCUPADO_GENERALIZADO=<qualquer valor/texto>]
 ```
 
 Em \<simulador desejado\>, digite 1, 2 ou 3.
@@ -53,6 +58,14 @@ $ make simulador1 TAMANHO_AMOSTRA=50000 NUM_THREADS=8
 
 Irá compilar o simulador 1 com tamanho de amostra 50000 e número de threads igual a 8.
 
+Para calcular E($B_C$) e E($U_C$), compile definindo PERIODO_OCUPADO_GENERALIZADO.
+
+Exemplo de compilação:
+
+```shell
+$ make simulador2 PERIODO_OCUPADO_GENERALIZADO=1 TAMANHO_AMOSTRA=30000 NUM_THREADS=8
+```
+
 Para executar qualquer um dos simuladores, digite:
 
 ```bash
@@ -60,6 +73,16 @@ $ ./simulador <número de iterações/requisições> <lambda> <mi> [D]
 ```
 
 Onde D é um parâmetro opcional para indicar que os serviços são determinísticos. Lambda e mi são as taxas de chegada e serviço.
+
+Se você compilou com PERIODO_OCUPADO_GENERALIZADO definido, digite:
+
+```bash
+$ ./simulador <número de iterações/requisições> <lambda> <mi> <número de clientes> [D]
+```
+
+O número de clientes deve ser maior que 1 e representa o C em $E(B_C) = C * \frac{\frac{1}{\mu}}{1 - \rho}$.
+
+**OBS.: Somente o simulador 2 foi programado para calcular E($B_C$) e E($U_C$).**
 
 <br>
 
