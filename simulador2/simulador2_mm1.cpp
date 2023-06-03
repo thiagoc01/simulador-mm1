@@ -36,9 +36,11 @@ typedef struct
     double& tempoSimulacao;
     double& ultimoEvento;
     double& ultimoServico;
+    double& inicioClientes; // |Guarda o tempo de início do período ocupado generalizado atual
 
     int& numPessoasFila;
     int& numPessoasSistema;
+    bool& analisandoFila; // Se true, a contagem do período ocupado generalizado foi iniciada
 
     std::vector<std::pair<double, int>>& numeroProcessosSistemaPeriodo; // Quantidade de processos no sistema em um período de tempo
     std::vector<std::pair<double, int>>& numeroProcessosFilaPeriodo; // Quantidade de processos na fila em um período de tempo
@@ -46,6 +48,7 @@ typedef struct
     std::vector<double>& temposSaida; // Análogo ao anterior para a saída
     std::vector<double>& temposSistema; // Tempo de serviço mais tempo na fila
     std::vector<double>& temposEspera; // Análogo ao anterior, porém somente na fila
+    std::vector<double>& temposPeriodosOcupadosGeneralizados; // Guarda os períodos ocupados generalizados
     std::priority_queue<Requisicao, std::vector<Requisicao>, ComparadorTemposRequisicao>& filaRequisicoes; // Fila com as requisições
 
 } ParametrosSimulador;
@@ -78,6 +81,7 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     double mediaProcessosFila = retornaSomaPessoas(numeroProcessosFilaPeriodo) / parametros.tempoSimulacao;
     double tempoMedioSistema;
     double tempoMedioEspera;
+    double tempoMedioPeriodoOcupadoGeneralizado;
 
     if (parametros.temposSistema.empty()) // Se o vetor está vazio, considera média 0
         tempoMedioSistema = 0.0;
@@ -90,6 +94,13 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
 
     else
         tempoMedioEspera = std::accumulate(parametros.temposEspera.begin(), parametros.temposEspera.end(), 0.0) / parametros.temposEspera.size();
+
+    if (parametros.temposPeriodosOcupadosGeneralizados.empty())
+        tempoMedioPeriodoOcupadoGeneralizado = 0.0;
+
+    else
+        tempoMedioPeriodoOcupadoGeneralizado = std::accumulate(parametros.temposPeriodosOcupadosGeneralizados.begin(),
+                    parametros.temposPeriodosOcupadosGeneralizados.end(), 0.0) / parametros.temposPeriodosOcupadosGeneralizados.size();
     
     #if NUM_THREADS == 1 && TAMANHO_AMOSTRA == 1
 
@@ -97,14 +108,15 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     std::cout << "Número médio de processos na fila (E(N_q)): " << mediaProcessosFila << std::endl;     
     std::cout << "Tempo médio no sistema (E(T)): " << tempoMedioSistema << std::endl; 
     std::cout << "Tempo médio na fila (E(W)): " << tempoMedioEspera << std::endl;
-    std::cout << "Comparativo E(T) simulado x E(T) analítico: " << tempoMedioSistema << " " << (1 / taxaServico) / (1 - (taxaChegada / taxaServico)) << std::endl;
+    std::cout << "Comparativo E(T) simulado (Período ocupado) x E(T) analítico: " << tempoMedioSistema << " " << (1 / taxaServico) / (1 - (taxaChegada / taxaServico)) << std::endl;
+    std::cout << "Comparativo E(B_C) simulado (Período ocupado generalizado) x C * E(T) analítico " << tempoMedioPeriodoOcupadoGeneralizado << " " << 10 * (1 / taxaServico) / (1 - (taxaChegada / taxaServico)) << std::endl;
     std::cout << std::endl;
 
     #endif
 
     mutexEstatisticas.lock();
 
-    estatisticas.adicionaAmostra(Metricas(mediaProcessosSistema, mediaProcessosFila, tempoMedioSistema, tempoMedioEspera));
+    estatisticas.adicionaAmostra(Metricas(mediaProcessosSistema, mediaProcessosFila, tempoMedioSistema, tempoMedioEspera, tempoMedioPeriodoOcupadoGeneralizado));
 
     mutexEstatisticas.unlock();
 }
@@ -130,6 +142,14 @@ void trataEventoChegada(const Requisicao& cabecaFila, const double& tempoChegada
 
     parametros.numPessoasSistema++;
     parametros.numPessoasFila++;
+
+    /* Há C clientes no sistema, começamos a contagem do período ocupado generalizado */
+
+    if (parametros.numPessoasSistema == 10 && !parametros.analisandoFila)
+    {
+        parametros.analisandoFila = true;
+        parametros.inicioClientes = parametros.tempoSimulacao;
+    }
 
     parametros.ultimoEvento = parametros.tempoSimulacao; // Guarda que esse foi o último evento
 
@@ -176,6 +196,14 @@ void trataEventoSaida(const Requisicao& cabecaFila, const double& tempoChegada, 
     
     parametros.numPessoasSistema--; // Requisição tratada
 
+    /* Todos foram atendidos, encerramos a contagem e colocamos o timestamp na memória */
+    
+    if (parametros.numPessoasSistema == 0 && parametros.analisandoFila)
+    {
+        parametros.analisandoFila = false;
+        parametros.temposPeriodosOcupadosGeneralizados.push_back(parametros.tempoSimulacao - parametros.inicioClientes);
+    }
+
     parametros.ultimoEvento = parametros.tempoSimulacao; // Informa que esse foi o último evento.
     parametros.ultimoServico = cabecaFila.retornaTempoRequisicao();
 
@@ -200,9 +228,11 @@ void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, boo
     double tempoSimulacao = 0.0;
     double ultimoEvento = 0.0;
     double ultimoServico = 0.0;
+    double inicioClientes = 0.0;
 
     int numPessoasFila = 0;
     int numPessoasSistema = 0;
+    bool analisandoFila = false;
 
     std::vector<std::pair<double, int>> numeroProcessosSistemaPeriodo;
     std::vector<std::pair<double, int>> numeroProcessosFilaPeriodo;
@@ -210,6 +240,7 @@ void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, boo
     std::vector<double> temposSaida;
     std::vector<double> temposSistema;
     std::vector<double> temposEspera;
+    std::vector<double> temposPeriodosOcupadosGeneralizados;
 
     std::priority_queue<Requisicao, std::vector<Requisicao>, ComparadorTemposRequisicao> filaRequisicoes;
 
@@ -220,14 +251,17 @@ void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, boo
         .tempoSimulacao = tempoSimulacao,
         .ultimoEvento = ultimoEvento,
         .ultimoServico = ultimoServico,
+        .inicioClientes = inicioClientes,
         .numPessoasFila = numPessoasFila,
         .numPessoasSistema = numPessoasSistema,
+        .analisandoFila = analisandoFila,
         .numeroProcessosSistemaPeriodo = numeroProcessosSistemaPeriodo,
         .numeroProcessosFilaPeriodo = numeroProcessosFilaPeriodo,
         .temposChegada = temposChegada,
         .temposSaida = temposSaida,
         .temposSistema = temposSistema,
         .temposEspera = temposEspera,
+        .temposPeriodosOcupadosGeneralizados = temposPeriodosOcupadosGeneralizados,
         .filaRequisicoes = filaRequisicoes
     };
 

@@ -20,6 +20,7 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     this->numeroMedioFilaSistema = 0.0;
     this->tempoMedioSistema = 0.0;
     this->tempoMedioFila = 0.0;
+    this->periodoOcupadoGeneralizadoMedio = 0.0;
 
     /* Equivalem a E(X linha ^ 2) */
 
@@ -27,6 +28,7 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     double esperancaQuadradoFilaSistema = 0.0;
     double esperancaQuadradoTempoMedioSistema = 0.0;
     double esperancaQuadradoTempoMedioFila = 0.0;
+    double esperancaQuadradoPeriodoOcupadoGeneralizadoMedio = 0.0;
 
     /* Realiza o somatório do numerador de E(X) e E(X^2) */
 
@@ -36,11 +38,13 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
         this->numeroMedioFilaSistema += amostra.retornaNumeroMedioFilaSistema();
         this->tempoMedioSistema += amostra.retornaTempoMedioSistema();
         this->tempoMedioFila += amostra.retornaTempoMedioFila();
+        this->periodoOcupadoGeneralizadoMedio += amostra.retornaPeriodoOcupadoGeneralizadoMedio();
         
         esperancaQuadradoProcessosSistema += (amostra.retornaNumeroMedioProcessosSistema() * amostra.retornaNumeroMedioProcessosSistema());
         esperancaQuadradoFilaSistema += (amostra.retornaNumeroMedioFilaSistema() * amostra.retornaNumeroMedioFilaSistema());
         esperancaQuadradoTempoMedioSistema += (amostra.retornaTempoMedioSistema() * amostra.retornaTempoMedioSistema());
         esperancaQuadradoTempoMedioFila += (amostra.retornaTempoMedioFila() * amostra.retornaTempoMedioFila());
+        esperancaQuadradoPeriodoOcupadoGeneralizadoMedio += (amostra.retornaPeriodoOcupadoGeneralizadoMedio() * amostra.retornaPeriodoOcupadoGeneralizadoMedio());
     }
 
     /* As 8 linhas a seguir dividem o numerador pelo tamanho da amostra para obter E(X) e E(X ^ 2) */
@@ -49,11 +53,13 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     this->numeroMedioFilaSistema /= this->amostras.size();
     this->tempoMedioSistema /= this->amostras.size();
     this->tempoMedioFila /= this->amostras.size();
+    this->periodoOcupadoGeneralizadoMedio /= this->amostras.size();
 
     esperancaQuadradoProcessosSistema /= this->amostras.size();
     esperancaQuadradoFilaSistema /= this->amostras.size();
     esperancaQuadradoTempoMedioSistema /= this->amostras.size();
     esperancaQuadradoTempoMedioFila /= this->amostras.size();
+    esperancaQuadradoPeriodoOcupadoGeneralizadoMedio /= this->amostras.size();
 
     /* Calcula a variância e desvio padrão de acordo com a definição. */
 
@@ -61,11 +67,13 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     this->varianciaFilaSistema = esperancaQuadradoFilaSistema - (this->numeroMedioFilaSistema * this->numeroMedioFilaSistema);
     this->varianciaTempoSistema = esperancaQuadradoTempoMedioSistema - (this->tempoMedioSistema * this->tempoMedioSistema);
     this->varianciaTempoFila = esperancaQuadradoTempoMedioFila - (this->tempoMedioFila * this->tempoMedioFila);
+    this->varianciaPeriodoOcupadoGeneralizadoMedio = esperancaQuadradoPeriodoOcupadoGeneralizadoMedio - (this->periodoOcupadoGeneralizadoMedio * this->periodoOcupadoGeneralizadoMedio);
 
     this->desvioPadraoProcessosSistema = std::sqrt(this->varianciaProcessosSistema);
     this->desvioPadraoFilaSistema = std::sqrt(this->varianciaFilaSistema);
     this->desvioPadraoTempoSistema = std::sqrt(this->varianciaTempoSistema);
     this->desvioPadraoTempoFila = std::sqrt(this->varianciaTempoFila);
+    this->desvioPadraoPeriodoOcupadoGeneralizadoMedio = std::sqrt(this->varianciaPeriodoOcupadoGeneralizadoMedio);
 }
 
 static void calculaLimites(std::unordered_map<std::string, double>& intervalosConfianca, const double& probabilidadeTaxaConfianca,
@@ -99,6 +107,9 @@ void Estatisticas::calculaIntervalosConfianca(const double& probabilidadeTaxaCon
     
     calculaLimites(this->intervaloConfiancaTempoFila, probabilidadeTaxaConfianca, this->tempoMedioFila,
                     this->desvioPadraoTempoFila, tamanhoAmostral);
+
+    calculaLimites(this->intervaloConfiancaPeriodoOcupadoGeneralizadoMedio, probabilidadeTaxaConfianca, this->periodoOcupadoGeneralizadoMedio,
+                    this->desvioPadraoPeriodoOcupadoGeneralizadoMedio, tamanhoAmostral);
 }
 
 double Estatisticas::retornaNumeroMedioProcessosSistema() const
@@ -121,6 +132,11 @@ double Estatisticas::retornaTempoMedioFila() const
     return this->tempoMedioFila;
 }
 
+double Estatisticas::retornaPeriodoOcupadoGeneralizadoMedio() const
+{
+    return this->periodoOcupadoGeneralizadoMedio;
+}
+
 double Estatisticas::retornaVarianciaProcessosSistema() const
 {
     return this->varianciaProcessosSistema;
@@ -139,6 +155,11 @@ double Estatisticas::retornaVarianciaTempoSistema() const
 double Estatisticas::retornaVarianciaTempoFila() const
 {
     return this->varianciaTempoFila;
+}
+
+double Estatisticas::retornaVarianciaPeriodoOcupadoGeneralizadoMedio() const
+{
+    return this->varianciaPeriodoOcupadoGeneralizadoMedio;
 }
 
 double Estatisticas::retornaDesvioPadraoProcessosSistema() const
@@ -161,6 +182,11 @@ double Estatisticas::retornaDesvioPadraoTempoFila() const
     return this->desvioPadraoTempoFila;
 }
 
+double Estatisticas::retornaDesvioPadraoPeriodoOcupadoGeneralizadoMedio() const
+{
+    return this->desvioPadraoPeriodoOcupadoGeneralizadoMedio;
+}
+
 std::unordered_map<std::string, double> Estatisticas::retornaIntervaloConfiancaProcessosSistema() const
 {
     return this->intervaloConfiancaProcessosSistema;
@@ -181,6 +207,11 @@ std::unordered_map<std::string, double> Estatisticas::retornaIntervaloConfiancaT
     return this->intervaloConfiancaTempoFila;
 }
 
+std::unordered_map<std::string, double> Estatisticas::retornaIntervaloConfiancaPeriodoOcupadoGeneralizadoMedio() const
+{
+    return this->intervaloConfiancaPeriodoOcupadoGeneralizadoMedio;
+}
+
 void Estatisticas::imprimeAnaliseAmostral(const double& taxaChegada, const double& taxaServico)
 {
     std::cout << "Média amostral de processos no sistema (E(N)): " << this->retornaNumeroMedioProcessosSistema() << std::endl;
@@ -188,17 +219,21 @@ void Estatisticas::imprimeAnaliseAmostral(const double& taxaChegada, const doubl
     std::cout << "Média amostral de tempo no sistema (E(T)): " << this->retornaTempoMedioSistema() << std::endl; 
     std::cout << "Média amostral de tempo na fila (E(W)): " << this->retornaTempoMedioFila() << std::endl;
 
-    std::cout << "\nComparativo E(T) médio simulado x E(T) analítico: " << this->retornaTempoMedioSistema() << " " << (1 / taxaServico) / (1 - (taxaChegada / taxaServico)) << std::endl;
+    std::cout << "\nComparativo E(T) amostral simulado x E(T) analítico: " << this->retornaTempoMedioSistema() << " " << (1 / taxaServico) / (1 - (taxaChegada / taxaServico)) << std::endl;
+
+    std::cout << "\nComparativo E(B_C) amostral simulado (Período ocupado generalizado) x C * E(T) analítico " << this->retornaPeriodoOcupadoGeneralizadoMedio() << " " << 10 * (1 / taxaServico) / (1 - (taxaChegada / taxaServico)) << std::endl;
 
     std::cout << "\nVariância amostral de processos no sistema (E(N)): " << this->retornaVarianciaProcessosSistema() << std::endl;
     std::cout << "Variância amostral de processos na fila (E(N_q)): " << this->retornaVarianciaFilaSistema() << std::endl;     
     std::cout << "Variância amostral de tempo no sistema (E(T)): " << this->retornaVarianciaTempoSistema() << std::endl; 
     std::cout << "Variância amostral de tempo na fila (E(W)): " << this->retornaVarianciaTempoFila() << std::endl;
+    std::cout << "Variância amostral do período ocupado generalizado (E(B_C)): " << this->retornaVarianciaPeriodoOcupadoGeneralizadoMedio() << std::endl;
 
     std::cout << "\nDesvio padrão amostral de processos no sistema (E(N)): " << this->retornaDesvioPadraoProcessosSistema() << std::endl;
     std::cout << "Desvio padrão amostral de processos na fila (E(N_q)): " << this->retornaDesvioPadraoFilaSistema() << std::endl;     
     std::cout << "Desvio padrão amostral de tempo no sistema (E(T)): " << this->retornaDesvioPadraoTempoSistema() << std::endl; 
     std::cout << "Desvio padrão amostral de tempo na fila (E(W)): " << this->retornaDesvioPadraoTempoFila() << std::endl;
+    std::cout << "Desvio padrão amostral do período ocupado generalizado (E(B_C)): " << this->retornaDesvioPadraoPeriodoOcupadoGeneralizadoMedio() << std::endl;
 
     auto intervalo = this->retornaIntervaloConfiancaProcessosSistema();
 
@@ -216,7 +251,9 @@ void Estatisticas::imprimeAnaliseAmostral(const double& taxaChegada, const doubl
 
     std::cout << "Intervalo de confiança de tempo na fila (E(W)): [" << intervalo["inferior"] << ", " << intervalo["superior"]<< "]" << std::endl;
 
-    
+    intervalo = this->retornaIntervaloConfiancaPeriodoOcupadoGeneralizadoMedio();
+
+    std::cout << "Intervalo de confiança de período ocupado generalizado (E(B_C)): [" << intervalo["inferior"] << ", " << intervalo["superior"]<< "]" << std::endl;
 }
 
 std::vector<Metricas> Estatisticas::retornaMetricas() const

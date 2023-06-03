@@ -31,6 +31,7 @@ void plotaGrafico(const Estatisticas &estatisticas)
     std::vector<double> numerosMediosProcessosFila;
     std::vector<double> temposMediosProcessosSistema;
     std::vector<double> temposMediosProcessosFila;
+    std::vector<double> periodosOcupadosGeneralizadosMedios;
 
     std::array<std::string, 3> legendas;
 
@@ -40,6 +41,7 @@ void plotaGrafico(const Estatisticas &estatisticas)
         numerosMediosProcessosFila.push_back(amostra.retornaNumeroMedioFilaSistema());
         temposMediosProcessosSistema.push_back(amostra.retornaTempoMedioSistema());
         temposMediosProcessosFila.push_back(amostra.retornaTempoMedioFila());
+        periodosOcupadosGeneralizadosMedios.push_back(amostra.retornaPeriodoOcupadoGeneralizadoMedio());
     }
 
     legendas[0] = "Número médio de processos no sistema";
@@ -62,4 +64,9 @@ void plotaGrafico(const Estatisticas &estatisticas)
     legendas[2] = "Histograma do tempo médio de processos na fila";
 
     realizaAcoesPlotagem(temposMediosProcessosFila, estatisticas.retornaTempoMedioFila(), legendas);
+
+    legendas[0] = "Período ocupado generalizado médio";
+    legendas[2] = "Histograma do período ocupado generalizado médio";
+
+    realizaAcoesPlotagem(periodosOcupadosGeneralizadosMedios, estatisticas.retornaPeriodoOcupadoGeneralizadoMedio(), legendas);
 }
