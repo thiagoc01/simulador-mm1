@@ -7,7 +7,13 @@
 #include <unordered_map>
 #include <string>
 
-/* Classe que guarda um conjunto de amostras e as estatística total. */
+struct EstatisticaTemposSistema
+{
+    std::unordered_map<double, double> estatisticaTemposSistema;
+    std::unordered_map<int, double> estatisticaNumeroProcessos;
+};
+
+/* Classe que guarda um conjunto de amostras e a estatística total. */
 
 class Estatisticas
 {
@@ -22,6 +28,8 @@ class Estatisticas
         double tempoMedioFila;
         double periodoOcupadoGeneralizadoMedio;
         double tempoMedioUmCliente;
+        struct EstatisticaTemposSistema mediaTemposNumerosProcessos;
+        std::vector<double> temposSistema, numerosProcessos, densidadeTempos, densidadeNumeros;
 
         double varianciaProcessosSistema;
         double varianciaFilaSistema;
@@ -29,6 +37,7 @@ class Estatisticas
         double varianciaTempoFila;
         double varianciaPeriodoOcupadoGeneralizadoMedio;
         double varianciaTempoMedioUmCliente;
+        struct EstatisticaTemposSistema varianciasTemposNumerosProcessos;
 
         double desvioPadraoProcessosSistema;
         double desvioPadraoFilaSistema;
@@ -36,6 +45,7 @@ class Estatisticas
         double desvioPadraoTempoFila;
         double desvioPadraoPeriodoOcupadoGeneralizadoMedio;
         double desvioPadraoTempoMedioUmCliente;
+        struct EstatisticaTemposSistema desviosPadroesTemposNumerosProcessos;
         
         /* As strings são "inferior" e "superior" para acessarmos os valores. */
         
@@ -45,9 +55,13 @@ class Estatisticas
         std::unordered_map<std::string, double> intervaloConfiancaTempoFila;
         std::unordered_map<std::string, double> intervaloConfiancaPeriodoOcupadoGeneralizadoMedio;
         std::unordered_map<std::string, double> intervaloConfiancaTempoMedioUmCliente;
+        std::unordered_map<std::string, struct EstatisticaTemposSistema> intervalosConfiancasTemposNumerosProcessos;
 
     public:
         void adicionaAmostra(const Metricas& amostra);
+
+        void calculaMediaAmostralTempoSistemaQtdProcessos(const Metricas& amostra,
+                                    struct EstatisticaTemposSistema& esperancaQuadrado, const bool& eUmaIteracao);
 
         std::vector<Metricas> retornaMetricas() const;
 
@@ -67,6 +81,8 @@ class Estatisticas
 
         double retornaTempoMedioUmCliente() const;
 
+        struct EstatisticaTemposSistema retornaMediasTemposNumerosProcessos() const;
+
         double retornaVarianciaProcessosSistema() const;
 
         double retornaVarianciaFilaSistema() const;
@@ -78,6 +94,8 @@ class Estatisticas
         double retornaVarianciaPeriodoOcupadoGeneralizadoMedio() const;
 
         double retornaVarianciaTempoMedioUmCliente() const;
+
+        struct EstatisticaTemposSistema retornaVarianciasTemposNumerosProcessos() const;
 
         double retornaDesvioPadraoProcessosSistema() const;
 
@@ -91,6 +109,8 @@ class Estatisticas
 
         double retornaDesvioPadraoTempoMedioUmCliente() const;
 
+        struct EstatisticaTemposSistema retornaDesviosPadroesTemposNumerosProcessos() const;
+
         std::unordered_map<std::string, double> retornaIntervaloConfiancaProcessosSistema() const;
 
         std::unordered_map<std::string, double> retornaIntervaloConfiancaFilaSistema() const;
@@ -102,6 +122,10 @@ class Estatisticas
         std::unordered_map<std::string, double> retornaIntervaloConfiancaPeriodoOcupadoGeneralizadoMedio() const;
 
         std::unordered_map<std::string, double> retornaIntervaloConfiancaTempoMedioUmCliente() const;
+
+        std::unordered_map<std::string, struct EstatisticaTemposSistema> retornaIntervalosConfiancasTemposNumerosProcessos() const;
+
+        void calculaVarianciaDesvioPadraoTemposNumerosProcessos(const struct EstatisticaTemposSistema& esperancaQuadradoTemposNumerosProcessos);
 
         void imprimeAnaliseAmostral(const double& taxaChegada, const double& taxaServico);
 };

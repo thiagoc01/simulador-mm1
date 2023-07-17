@@ -2,16 +2,19 @@
 #include <vector>
 #include <queue>
 #include <mutex>
-
+#include <unordered_map>
+#include <algorithm>
+#include "grafico/grafico.hpp"
 #include "simulador2/requisicao.hpp"
 #include "simulador_mm1.hpp"
 #include "geracao_tempos.hpp"
 #include "estatistica/metricas.hpp"
 #include "estatistica/estatisticas.hpp"
 #include "thread/thread.hpp"
+#include <string>
 
 extern int numClientes; // Definido em main.cpp
-
+namespace plt = matplotlibcpp;
 struct ComparadorTemposRequisicao // Utilizado para ser a função de comparação na fila, já que queremos o menor tempo sempre.
 {
     bool operator()(Requisicao& r1, Requisicao& r2)
@@ -113,6 +116,48 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     else
         tempoMedioEspera = std::accumulate(parametros.temposEspera.begin(), parametros.temposEspera.end(), 0.0) / parametros.temposEspera.size();
 
+
+    std::vector<double> copia, copia2, densidade, densidade2;
+    std::unordered_map<double, int> contagens;
+    std::unordered_map<int, int> contagens2;
+    int aux = 0, aux2 = 0;
+    for (auto& s: parametros.temposSistema)
+    {
+        contagens[s]++;
+
+        //if (contagens.at(s) == 1)
+        //    copia.push_back(s);
+
+        aux++;
+    }
+
+    for (auto& s: parametros.numeroProcessosSistemaPeriodo)
+    {
+        contagens2[s.second]++;
+       // if (contagens2.at(s.second) == 1)
+       //     copia2.push_back(s.second);
+        aux2++;
+    }
+    
+    struct ContagensTemposSistema quantidades = {.contagensTemposSistema = contagens,
+                    .contagensNumeroProcessos = contagens2, .totalOcorrenciasTemposSistema = aux, .totalOcorrenciasNumeroProcessos = aux2};
+    /*std::sort(copia.begin(), copia.end());
+    std::sort(copia2.begin(), copia2.end());
+
+    for (auto& m : copia)
+        densidade.push_back(contagens[m] / static_cast<double>(aux));
+
+    for (auto& m : copia2)
+        densidade2.push_back(contagens2[m] / static_cast<double>(aux2));
+
+    std::vector<double> cumsum(densidade.size()), cumsum2(densidade2.size());
+    std::partial_sum(densidade.begin(), densidade.end(), cumsum.begin());
+    std::partial_sum(densidade2.begin(), densidade2.end(), cumsum2.begin());
+    plt::plot(copia, cumsum);
+    plt::show();
+    plt::plot(copia2, cumsum2, {{"drawstyle", "steps-post"}});
+    plt::show();*/
+
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
     if (parametros.temposPeriodosOcupadosGeneralizados.empty())
@@ -142,6 +187,7 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     std::cout << "Comparativo E(U_C) simulado vs E(U_C) analítico: " << tempoMedioPeriodoOcupadoGeneralizado - tempoMedioSistema <<
                  " " << numClientes * tempoMedioPeriodoOcupadoAnalitico - tempoMedioPeriodoOcupadoAnalitico << std::endl;
 
+    
     #endif
 
     std::cout << std::endl;
@@ -151,7 +197,7 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     mutexEstatisticas.lock();
 
     estatisticas.adicionaAmostra(Metricas(mediaProcessosSistema, mediaProcessosFila, tempoMedioSistema,
-                        tempoMedioEspera, tempoMedioPeriodoOcupadoGeneralizado, tempoMedioPeriodoOcupadoGeneralizado - tempoMedioSistema));
+                       tempoMedioEspera, tempoMedioPeriodoOcupadoGeneralizado, tempoMedioPeriodoOcupadoGeneralizado - tempoMedioSistema, ContagensTemposSistema(quantidades)));
 
     mutexEstatisticas.unlock();
 }
@@ -346,6 +392,7 @@ void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, boo
         tempoServico = geraTempoServico(taxaServico);
 
         atualizaSistema(tempoChegada, tempoServico, parametros);
+        
     }
 
     /* Calcula as métricas dessa amostra */

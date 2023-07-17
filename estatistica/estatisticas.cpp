@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
 /* Coloca mais uma amostra para análise. */
 
@@ -12,6 +13,91 @@ void Estatisticas::adicionaAmostra(const Metricas& amostra)
 
 /* Aplica a fórmula da variância para cada métrica de cada amostra. */
 
+void Estatisticas::calculaMediaAmostralTempoSistemaQtdProcessos(const Metricas& amostra,
+                        struct EstatisticaTemposSistema& esperancaQuadrado, const bool& eUmaIteracao)
+{
+    if (eUmaIteracao)
+    {
+        struct ContagensTemposSistema quantidades = amostra.retornaQuantidadesTemposNumsProcessos();
+
+        for (const auto& temposProcessos : quantidades.contagensTemposSistema)
+        {
+            this->mediaTemposNumerosProcessos.estatisticaTemposSistema[temposProcessos.first] +=
+                    (temposProcessos.second / quantidades.totalOcorrenciasTemposSistema);
+
+            esperancaQuadrado.estatisticaTemposSistema[temposProcessos.first] += ( (temposProcessos.second / quantidades.totalOcorrenciasTemposSistema)
+                                * (temposProcessos.second / quantidades.totalOcorrenciasTemposSistema) );
+        }
+
+        for (const auto& numerosProcessos : quantidades.contagensNumeroProcessos)
+        {
+            this->mediaTemposNumerosProcessos.estatisticaNumeroProcessos[numerosProcessos.first] +=
+                    (numerosProcessos.second / quantidades.totalOcorrenciasNumeroProcessos);
+
+            esperancaQuadrado.estatisticaTemposSistema[numerosProcessos.first] += ( (numerosProcessos.second / quantidades.totalOcorrenciasNumeroProcessos)
+                    * (numerosProcessos.second / quantidades.totalOcorrenciasNumeroProcessos) );
+        }
+    }
+
+    else
+    {
+        for (const auto& temposProcessos : this->mediaTemposNumerosProcessos.estatisticaTemposSistema)
+            this->temposSistema.push_back(temposProcessos.first);
+
+        for (const auto& numerosProcessos : this->mediaTemposNumerosProcessos.estatisticaNumeroProcessos)
+            this->numerosProcessos.push_back(numerosProcessos.first);
+
+        std::sort(this->temposSistema.begin(), this->temposSistema.end());
+        std::sort(this->numerosProcessos.begin(), this->numerosProcessos.end());
+
+        for (const auto& tempos : this->temposSistema)
+        {
+            this->mediaTemposNumerosProcessos.estatisticaTemposSistema[tempos] /= this->amostras.size();
+
+            this->densidadeTempos.push_back(this->mediaTemposNumerosProcessos.estatisticaTemposSistema.at(tempos)
+                                        / this->amostras.size());
+
+            esperancaQuadrado.estatisticaTemposSistema[tempos] /= this->amostras.size();
+        }
+
+        for (const auto& numeros : this->numerosProcessos)
+        {
+            this->mediaTemposNumerosProcessos.estatisticaNumeroProcessos[numeros] /= this->amostras.size();
+
+            this->densidadeTempos.push_back(this->mediaTemposNumerosProcessos.estatisticaNumeroProcessos.at(numeros)
+                                        / this->amostras.size());
+
+            esperancaQuadrado.estatisticaNumeroProcessos[numeros] /= this->amostras.size();
+        }
+    }    
+}
+
+void Estatisticas::calculaVarianciaDesvioPadraoTemposNumerosProcessos(const struct EstatisticaTemposSistema& esperancaQuadradoTemposNumerosProcessos)
+{
+    for (const auto& tempos : this->temposSistema)
+    {
+        this->varianciasTemposNumerosProcessos.estatisticaTemposSistema[tempos] = 
+                    esperancaQuadradoTemposNumerosProcessos.estatisticaTemposSistema.at(tempos) - 
+                    (this->mediaTemposNumerosProcessos.estatisticaTemposSistema.at(tempos) 
+                    * this->mediaTemposNumerosProcessos.estatisticaTemposSistema.at(tempos));
+
+        this->desviosPadroesTemposNumerosProcessos.estatisticaTemposSistema[tempos] = 
+                    std::sqrt(this->varianciasTemposNumerosProcessos.estatisticaTemposSistema.at(tempos));
+    }
+
+    for (const auto& numeros : this->numerosProcessos)
+    {
+        this->varianciasTemposNumerosProcessos.estatisticaNumeroProcessos[numeros] = 
+                    esperancaQuadradoTemposNumerosProcessos.estatisticaNumeroProcessos.at(numeros) - 
+                    (this->mediaTemposNumerosProcessos.estatisticaNumeroProcessos.at(numeros) 
+                    * this->mediaTemposNumerosProcessos.estatisticaNumeroProcessos.at(numeros));
+
+        this->desviosPadroesTemposNumerosProcessos.estatisticaTemposSistema[numeros] = 
+                    std::sqrt(this->varianciasTemposNumerosProcessos.estatisticaNumeroProcessos.at(numeros));
+    }
+
+}
+
 void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
 {
     /* Equivalem a E(X linha) */
@@ -20,6 +106,7 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     this->numeroMedioFilaSistema = 0.0;
     this->tempoMedioSistema = 0.0;
     this->tempoMedioFila = 0.0;
+
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
@@ -34,6 +121,7 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     double esperancaQuadradoFilaSistema = 0.0;
     double esperancaQuadradoTempoMedioSistema = 0.0;
     double esperancaQuadradoTempoMedioFila = 0.0;
+    struct EstatisticaTemposSistema esperancaQuadradoTemposNumerosProcessos;
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
@@ -50,6 +138,8 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
         this->numeroMedioFilaSistema += amostra.retornaNumeroMedioFilaSistema();
         this->tempoMedioSistema += amostra.retornaTempoMedioSistema();
         this->tempoMedioFila += amostra.retornaTempoMedioFila();
+
+        calculaMediaAmostralTempoSistemaQtdProcessos(amostra, esperancaQuadradoTemposNumerosProcessos, true);
 
         #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
@@ -83,6 +173,8 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     esperancaQuadradoTempoMedioSistema /= this->amostras.size();
     esperancaQuadradoTempoMedioFila /= this->amostras.size();
 
+    calculaMediaAmostralTempoSistemaQtdProcessos(this->amostras.back(), esperancaQuadradoTemposNumerosProcessos, false);
+
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
     this->periodoOcupadoGeneralizadoMedio /= this->amostras.size();
@@ -112,6 +204,8 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     this->desvioPadraoTempoSistema = std::sqrt(this->varianciaTempoSistema);
     this->desvioPadraoTempoFila = std::sqrt(this->varianciaTempoFila);
 
+    calculaVarianciaDesvioPadraoTemposNumerosProcessos(esperancaQuadradoTemposNumerosProcessos);
+
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
     this->desvioPadraoPeriodoOcupadoGeneralizadoMedio = std::sqrt(this->varianciaPeriodoOcupadoGeneralizadoMedio);
@@ -134,6 +228,45 @@ static void calculaLimites(std::unordered_map<std::string, double>& intervalosCo
     intervalosConfianca.insert({"superior", limiteSuperior});
 }
 
+static void calculaLimitesTemposNumerosProcessos(std::unordered_map<std::string, struct EstatisticaTemposSistema>& intervalosConfianca,
+                            const double& probabilidadeTaxaConfianca,
+                            const struct EstatisticaTemposSistema& valoresMedios,
+                            const struct EstatisticaTemposSistema& desviosPadroes,
+                            const int& tamanhoAmostral)
+{
+
+    intervalosConfianca.insert({"inferior", EstatisticaTemposSistema()});
+    intervalosConfianca.insert({"superior", EstatisticaTemposSistema()});
+
+    for (const auto& tempos : valoresMedios.estatisticaTemposSistema)
+    {
+        double limiteInferior, limiteSuperior;
+
+        limiteInferior = valoresMedios.estatisticaTemposSistema.at(tempos.first) - probabilidadeTaxaConfianca
+                        * (desviosPadroes.estatisticaTemposSistema.at(tempos.first) / std::sqrt(tamanhoAmostral));
+
+        limiteSuperior = valoresMedios.estatisticaTemposSistema.at(tempos.first) + probabilidadeTaxaConfianca
+                        * (desviosPadroes.estatisticaTemposSistema.at(tempos.first) / std::sqrt(tamanhoAmostral));
+
+        intervalosConfianca["inferior"].estatisticaTemposSistema[tempos.first] = limiteInferior;
+        intervalosConfianca["superior"].estatisticaTemposSistema[tempos.first] = limiteSuperior;
+    }
+
+    for (const auto& numeros : valoresMedios.estatisticaNumeroProcessos)
+    {
+        double limiteInferior, limiteSuperior;
+
+        limiteInferior = valoresMedios.estatisticaNumeroProcessos.at(numeros.first) - probabilidadeTaxaConfianca
+                        * (desviosPadroes.estatisticaNumeroProcessos.at(numeros.first) / std::sqrt(tamanhoAmostral));
+
+        limiteSuperior = valoresMedios.estatisticaNumeroProcessos.at(numeros.first) + probabilidadeTaxaConfianca
+                        * (desviosPadroes.estatisticaNumeroProcessos.at(numeros.first) / std::sqrt(tamanhoAmostral));
+
+        intervalosConfianca["inferior"].estatisticaNumeroProcessos[numeros.first] = limiteInferior;
+        intervalosConfianca["superior"].estatisticaNumeroProcessos[numeros.first] = limiteSuperior;
+    }
+}
+
 /* Aplica a fórmula do IC para cada estatística. */
 
 void Estatisticas::calculaIntervalosConfianca(const double& probabilidadeTaxaConfianca)
@@ -151,6 +284,9 @@ void Estatisticas::calculaIntervalosConfianca(const double& probabilidadeTaxaCon
     
     calculaLimites(this->intervaloConfiancaTempoFila, probabilidadeTaxaConfianca, this->tempoMedioFila,
                     this->desvioPadraoTempoFila, tamanhoAmostral);
+
+    calculaLimitesTemposNumerosProcessos(this->intervalosConfiancasTemposNumerosProcessos, probabilidadeTaxaConfianca,
+                    this->mediaTemposNumerosProcessos, this->desviosPadroesTemposNumerosProcessos, tamanhoAmostral);
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
@@ -193,6 +329,11 @@ double Estatisticas::retornaTempoMedioUmCliente() const
     return this->tempoMedioUmCliente;
 }
 
+struct EstatisticaTemposSistema Estatisticas::retornaMediasTemposNumerosProcessos() const
+{
+    return this->mediaTemposNumerosProcessos;
+}
+
 double Estatisticas::retornaVarianciaProcessosSistema() const
 {
     return this->varianciaProcessosSistema;
@@ -221,6 +362,11 @@ double Estatisticas::retornaVarianciaPeriodoOcupadoGeneralizadoMedio() const
 double Estatisticas::retornaVarianciaTempoMedioUmCliente() const
 {
     return this->varianciaTempoMedioUmCliente;
+}
+
+struct EstatisticaTemposSistema Estatisticas::retornaVarianciasTemposNumerosProcessos() const
+{
+    return this->varianciasTemposNumerosProcessos;
 }
 
 double Estatisticas::retornaDesvioPadraoProcessosSistema() const
@@ -253,6 +399,11 @@ double Estatisticas::retornaDesvioPadraoTempoMedioUmCliente() const
     return this->desvioPadraoTempoMedioUmCliente;
 }
 
+struct EstatisticaTemposSistema Estatisticas::retornaDesviosPadroesTemposNumerosProcessos() const
+{
+    return this->desviosPadroesTemposNumerosProcessos;
+}
+
 std::unordered_map<std::string, double> Estatisticas::retornaIntervaloConfiancaProcessosSistema() const
 {
     return this->intervaloConfiancaProcessosSistema;
@@ -281,6 +432,11 @@ std::unordered_map<std::string, double> Estatisticas::retornaIntervaloConfiancaP
 std::unordered_map<std::string, double> Estatisticas::retornaIntervaloConfiancaTempoMedioUmCliente() const
 {
     return this->intervaloConfiancaTempoMedioUmCliente;
+}
+
+std::unordered_map<std::string, struct EstatisticaTemposSistema> Estatisticas::retornaIntervalosConfiancasTemposNumerosProcessos() const
+{
+    return this->intervalosConfiancasTemposNumerosProcessos;
 }
 
 void Estatisticas::imprimeAnaliseAmostral(const double& taxaChegada, const double& taxaServico)

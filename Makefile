@@ -58,7 +58,7 @@ else
 
 		INCLUDEDIR1 = include/
 		INCLUDEDIR2 = /usr/include/python$(versaoPython)
-		FLAGS = -I $(INCLUDEDIR1) -I $(INCLUDEDIR2) $(NUM_THREADS2) $(TAMANHO_AMOSTRA2) -std=c++2a -lpython$(versaoPython) -lpthread -w $(DEFINE_PERIODO)
+		FLAGS = -I $(INCLUDEDIR1) -I $(INCLUDEDIR2) $(NUM_THREADS2) $(TAMANHO_AMOSTRA2) -std=c++2a -lpython$(versaoPython) -lpthread -w $(DEFINE_PERIODO) -g
 
 	else
 
