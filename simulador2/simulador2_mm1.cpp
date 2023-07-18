@@ -116,47 +116,28 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     else
         tempoMedioEspera = std::accumulate(parametros.temposEspera.begin(), parametros.temposEspera.end(), 0.0) / parametros.temposEspera.size();
 
+    std::unordered_map<double, int> contagensOcorrenciasTemposProcessos;
+    std::unordered_map<int, int> contagensOcorrenciasNumerosProcessos;
+    int quantidadeTotalTemposGerados = 0, quantidadeTotalProcessosGerados = 0;
 
-    std::vector<double> copia, copia2, densidade, densidade2;
-    std::unordered_map<double, int> contagens;
-    std::unordered_map<int, int> contagens2;
-    int aux = 0, aux2 = 0;
-    for (auto& s: parametros.temposSistema)
+    for (auto& t : parametros.temposSistema)
     {
-        contagens[std::ceil(s * 10e2) / 10e2]++;
+        contagensOcorrenciasTemposProcessos[std::ceil(t * 10e1) / 10e1]++; // Trunca pra duas casas decimais o tempo
 
-        //if (contagens.at(s) == 1)
-        //    copia.push_back(s);
-
-        aux++;
+        quantidadeTotalTemposGerados++;
     }
 
-    for (auto& s: parametros.numeroProcessosSistemaPeriodo)
+    for (auto& n : parametros.numeroProcessosSistemaPeriodo)
     {
-        contagens2[s.second]++;
-       // if (contagens2.at(s.second) == 1)
-       //     copia2.push_back(s.second);
-        aux2++;
+        contagensOcorrenciasNumerosProcessos[n.second]++;
+        quantidadeTotalProcessosGerados++;
     }
     
-    struct ContagensTemposSistema quantidades = {.contagensTemposSistema = contagens,
-                    .contagensNumeroProcessos = contagens2, .totalOcorrenciasTemposSistema = aux, .totalOcorrenciasNumeroProcessos = aux2};
-    /*std::sort(copia.begin(), copia.end());
-    std::sort(copia2.begin(), copia2.end());
-
-    for (auto& m : copia)
-        densidade.push_back(contagens[m] / static_cast<double>(aux));
-
-    for (auto& m : copia2)
-        densidade2.push_back(contagens2[m] / static_cast<double>(aux2));
-
-    std::vector<double> cumsum(densidade.size()), cumsum2(densidade2.size());
-    std::partial_sum(densidade.begin(), densidade.end(), cumsum.begin());
-    std::partial_sum(densidade2.begin(), densidade2.end(), cumsum2.begin());
-    plt::plot(copia, cumsum);
-    plt::show();
-    plt::plot(copia2, cumsum2, {{"drawstyle", "steps-post"}});
-    plt::show();*/
+    struct ContagensTemposSistema quantidades = {.contagensTemposSistema = contagensOcorrenciasTemposProcessos,
+                    .contagensNumeroProcessos = contagensOcorrenciasNumerosProcessos,
+                    .totalOcorrenciasTemposSistema = quantidadeTotalTemposGerados,
+                    .totalOcorrenciasNumeroProcessos = quantidadeTotalProcessosGerados};
+    
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
@@ -198,7 +179,6 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
 
     estatisticas.adicionaAmostra(Metricas(mediaProcessosSistema, mediaProcessosFila, tempoMedioSistema,
                        tempoMedioEspera, tempoMedioPeriodoOcupadoGeneralizado, tempoMedioPeriodoOcupadoGeneralizado - tempoMedioSistema, ContagensTemposSistema(quantidades)));
-
     mutexEstatisticas.unlock();
 }
 

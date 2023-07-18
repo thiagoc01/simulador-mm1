@@ -4,6 +4,8 @@
 #include <iostream>
 #include <algorithm>
 
+/* Todos os cálculos pra número de clientes e tempos de sistema são análogos aos demais, mas com n-dimensões */
+
 /* Coloca mais uma amostra para análise. */
 
 void Estatisticas::adicionaAmostra(const Metricas& amostra)
@@ -16,7 +18,7 @@ void Estatisticas::adicionaAmostra(const Metricas& amostra)
 void Estatisticas::calculaMediaAmostralTempoSistemaQtdProcessos(const Metricas& amostra,
                         struct EstatisticaTemposSistema& esperancaQuadrado, const bool& eUmaIteracao)
 {
-    if (eUmaIteracao)
+    if (eUmaIteracao) // Calculando uma iteração, nós devemos acumular os valores apenas. Aplica E(X) e E(X^2) pra cada ocorrência
     {
         struct ContagensTemposSistema quantidades = amostra.retornaQuantidadesTemposNumsProcessos();
 
@@ -39,16 +41,20 @@ void Estatisticas::calculaMediaAmostralTempoSistemaQtdProcessos(const Metricas& 
         }
     }
 
-    else
+    else // Calcula a CDF e também a média
     {
+        /* Prepara o vetor do eixo X */
+
         for (const auto& temposProcessos : this->mediaTemposNumerosProcessos.estatisticaTemposSistema)
             this->temposSistema.push_back(temposProcessos.first);
 
         for (const auto& numerosProcessos : this->mediaTemposNumerosProcessos.estatisticaNumeroProcessos)
             this->numerosProcessos.push_back(numerosProcessos.first);
 
-        std::sort(this->temposSistema.begin(), this->temposSistema.end());
+        std::sort(this->temposSistema.begin(), this->temposSistema.end()); // Faz os sorts pra organizar de forma crescente
         std::sort(this->numerosProcessos.begin(), this->numerosProcessos.end());
+
+        /* Prepara o vetor do eixo Y com os valores normalizados e também as médias */
 
         for (const auto& tempos : this->temposSistema)
         {
@@ -119,7 +125,7 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     double esperancaQuadradoFilaSistema = 0.0;
     double esperancaQuadradoTempoMedioSistema = 0.0;
     double esperancaQuadradoTempoMedioFila = 0.0;
-    struct EstatisticaTemposSistema esperancaQuadradoTemposNumerosProcessos;
+    struct EstatisticaTemposSistema esperancaQuadradoTemposNumerosProcessos; // Guarda E(X^2) de todas as ocorrências
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     

@@ -3,7 +3,9 @@
 
 #include <unordered_map>
 
-struct ContagensTemposSistema
+/* Guarda as quantidades de ocorrências dos tempos de clientes calculados e as quantidades de processos no sistema */ 
+
+struct ContagensTemposSistema 
 {
     std::unordered_map<double, int> contagensTemposSistema;
     std::unordered_map<int, int> contagensNumeroProcessos;

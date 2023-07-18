@@ -28,7 +28,7 @@ class Estatisticas
         double tempoMedioFila;
         double periodoOcupadoGeneralizadoMedio;
         double tempoMedioUmCliente;
-        struct EstatisticaTemposSistema mediaTemposNumerosProcessos;
+        struct EstatisticaTemposSistema mediaTemposNumerosProcessos; // Média das probabilidades dos tempos de sistema e números de processos
         
 
         double varianciaProcessosSistema;
@@ -37,7 +37,7 @@ class Estatisticas
         double varianciaTempoFila;
         double varianciaPeriodoOcupadoGeneralizadoMedio;
         double varianciaTempoMedioUmCliente;
-        struct EstatisticaTemposSistema varianciasTemposNumerosProcessos;
+        struct EstatisticaTemposSistema varianciasTemposNumerosProcessos; // Análogo à média
 
         double desvioPadraoProcessosSistema;
         double desvioPadraoFilaSistema;
@@ -45,7 +45,7 @@ class Estatisticas
         double desvioPadraoTempoFila;
         double desvioPadraoPeriodoOcupadoGeneralizadoMedio;
         double desvioPadraoTempoMedioUmCliente;
-        struct EstatisticaTemposSistema desviosPadroesTemposNumerosProcessos;
+        struct EstatisticaTemposSistema desviosPadroesTemposNumerosProcessos; // Análogo à média
         
         /* As strings são "inferior" e "superior" para acessarmos os valores. */
         
@@ -55,12 +55,10 @@ class Estatisticas
         std::unordered_map<std::string, double> intervaloConfiancaTempoFila;
         std::unordered_map<std::string, double> intervaloConfiancaPeriodoOcupadoGeneralizadoMedio;
         std::unordered_map<std::string, double> intervaloConfiancaTempoMedioUmCliente;
-        std::unordered_map<std::string, struct EstatisticaTemposSistema> intervalosConfiancasTemposNumerosProcessos;
+        std::unordered_map<std::string, struct EstatisticaTemposSistema> intervalosConfiancasTemposNumerosProcessos; // Análogo à média
 
         void imprimeDadosTemposNumsProcessos(const struct EstatisticaTemposSistema& dados, const std::string& tipoDado);
         void imprimeIntervalosConfiancaTemposNumsProcessos( const std::unordered_map<std::string, struct EstatisticaTemposSistema>& dados);
-
-
 
     public:
         std::vector<double> temposSistema, numerosProcessos, densidadeTempos, densidadeNumeros;
