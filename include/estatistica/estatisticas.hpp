@@ -19,6 +19,9 @@ class Estatisticas
 {
     private:
         std::vector<Metricas> amostras;
+        struct EstatisticaTemposSistema esperancaQuadradoTemposNumerosProcessos; // Guarda E(X^2) de todas as ocorrências
+        std::vector<double> temposSistema, numerosProcessos, densidadeTempos, densidadeNumeros;
+        std::vector<double> densidadeTemposInferior, densidadeNumerosInferior, densidadeTemposSuperior, densidadeNumerosSuperior;
 
         /* Equivale às esperanças/médias amostrais */
 
@@ -61,12 +64,10 @@ class Estatisticas
         void imprimeIntervalosConfiancaTemposNumsProcessos( const std::unordered_map<std::string, struct EstatisticaTemposSistema>& dados);
 
     public:
-        std::vector<double> temposSistema, numerosProcessos, densidadeTempos, densidadeNumeros;
-        std::vector<double> densidadeTemposInferior, densidadeNumerosInferior, densidadeTemposSuperior, densidadeNumerosSuperior;
+        
         void adicionaAmostra(const Metricas& amostra);
 
-        void calculaMediaAmostralTempoSistemaQtdProcessos(const Metricas& amostra,
-                                    struct EstatisticaTemposSistema& esperancaQuadrado, const bool& eUmaIteracao);
+        void calculaMediaAmostralTempoSistemaQtdProcessos(const struct ContagensTemposSistema& quantidades, const bool& eUmaIteracao);
 
         std::vector<Metricas> retornaMetricas() const;
 
@@ -133,6 +134,22 @@ class Estatisticas
         void calculaVarianciaDesvioPadraoTemposNumerosProcessos(const struct EstatisticaTemposSistema& esperancaQuadradoTemposNumerosProcessos);
 
         void imprimeAnaliseAmostral(const double& taxaChegada, const double& taxaServico);
+
+        const std::vector<double>& retornaTemposSistema() const;
+
+        const std::vector<double>& retornaNumerosProcessos() const;
+
+        const std::vector<double>& retornaDensidadeTempos() const;
+
+        const std::vector<double>& retornaDensidadeNumeros() const;
+
+        const std::vector<double>& retornaDensidadeTemposInferior() const;
+
+        const std::vector<double>& retornaDensidadeNumerosInferior() const;
+
+        const std::vector<double>& retornaDensidadeTemposSuperior() const;
+
+        const std::vector<double>& retornaDensidadeNumerosSuperior() const;
 };
 
 #endif

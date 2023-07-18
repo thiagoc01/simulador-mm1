@@ -117,8 +117,8 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
         tempoMedioEspera = std::accumulate(parametros.temposEspera.begin(), parametros.temposEspera.end(), 0.0) / parametros.temposEspera.size();
 
     std::unordered_map<double, int> contagensOcorrenciasTemposProcessos;
-    std::unordered_map<int, int> contagensOcorrenciasNumerosProcessos;
-    int quantidadeTotalTemposGerados = 0, quantidadeTotalProcessosGerados = 0;
+    std::unordered_map<int, double> contagensOcorrenciasNumerosProcessos;
+    int quantidadeTotalTemposGerados = 0;
 
     for (auto& t : parametros.temposSistema)
     {
@@ -128,15 +128,12 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     }
 
     for (auto& n : parametros.numeroProcessosSistemaPeriodo)
-    {
-        contagensOcorrenciasNumerosProcessos[n.second]++;
-        quantidadeTotalProcessosGerados++;
-    }
+        contagensOcorrenciasNumerosProcessos[n.second] += n.first;
     
     struct ContagensTemposSistema quantidades = {.contagensTemposSistema = contagensOcorrenciasTemposProcessos,
-                    .contagensNumeroProcessos = contagensOcorrenciasNumerosProcessos,
+                    .contagemTemposQtdProcessos = contagensOcorrenciasNumerosProcessos,
                     .totalOcorrenciasTemposSistema = quantidadeTotalTemposGerados,
-                    .totalOcorrenciasNumeroProcessos = quantidadeTotalProcessosGerados};
+                    .tempoSimulacao = parametros.tempoSimulacao};
     
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
@@ -178,7 +175,10 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     mutexEstatisticas.lock();
 
     estatisticas.adicionaAmostra(Metricas(mediaProcessosSistema, mediaProcessosFila, tempoMedioSistema,
-                       tempoMedioEspera, tempoMedioPeriodoOcupadoGeneralizado, tempoMedioPeriodoOcupadoGeneralizado - tempoMedioSistema, ContagensTemposSistema(quantidades)));
+                       tempoMedioEspera, tempoMedioPeriodoOcupadoGeneralizado, tempoMedioPeriodoOcupadoGeneralizado - tempoMedioSistema));
+
+    estatisticas.calculaMediaAmostralTempoSistemaQtdProcessos(quantidades, true);
+
     mutexEstatisticas.unlock();
 }
 

@@ -4,7 +4,11 @@
 #include <iostream>
 #include <algorithm>
 
-/* Todos os cálculos pra número de clientes e tempos de sistema são análogos aos demais, mas com n-dimensões */
+/*
+    Todos os cálculos pra número de clientes e tempos de sistema são análogos aos demais, mas com n-dimensões.
+    Por serem muitos dados, não salvamos na amostra, e sim calculamos a cada iteração.
+    Utilizamos o fato de que E(sum_i X_i) = sum_i E(X_i), onde X_i é a variável de uma amostra i.
+*/
 
 /* Coloca mais uma amostra para análise. */
 
@@ -15,29 +19,26 @@ void Estatisticas::adicionaAmostra(const Metricas& amostra)
 
 /* Aplica a fórmula da variância para cada métrica de cada amostra. */
 
-void Estatisticas::calculaMediaAmostralTempoSistemaQtdProcessos(const Metricas& amostra,
-                        struct EstatisticaTemposSistema& esperancaQuadrado, const bool& eUmaIteracao)
+void Estatisticas::calculaMediaAmostralTempoSistemaQtdProcessos(const struct ContagensTemposSistema& quantidades, const bool& eUmaIteracao)
 {
     if (eUmaIteracao) // Calculando uma iteração, nós devemos acumular os valores apenas. Aplica E(X) e E(X^2) pra cada ocorrência
     {
-        struct ContagensTemposSistema quantidades = amostra.retornaQuantidadesTemposNumsProcessos();
-
         for (const auto& temposProcessos : quantidades.contagensTemposSistema)
         {
             this->mediaTemposNumerosProcessos.estatisticaTemposSistema[temposProcessos.first] +=
                     (temposProcessos.second / static_cast<double>(quantidades.totalOcorrenciasTemposSistema));
 
-            esperancaQuadrado.estatisticaTemposSistema[temposProcessos.first] += ( (temposProcessos.second / static_cast<double>(quantidades.totalOcorrenciasTemposSistema))
+            this->esperancaQuadradoTemposNumerosProcessos.estatisticaTemposSistema[temposProcessos.first] += ( (temposProcessos.second / static_cast<double>(quantidades.totalOcorrenciasTemposSistema))
                                 * (temposProcessos.second / static_cast<double>(quantidades.totalOcorrenciasTemposSistema)) );
         }
 
-        for (const auto& numerosProcessos : quantidades.contagensNumeroProcessos)
+        for (const auto& numerosProcessos : quantidades.contagemTemposQtdProcessos)
         {
             this->mediaTemposNumerosProcessos.estatisticaNumeroProcessos[numerosProcessos.first] +=
-                    (numerosProcessos.second / static_cast<double>(quantidades.totalOcorrenciasNumeroProcessos));
+                    (numerosProcessos.second / quantidades.tempoSimulacao);
 
-            esperancaQuadrado.estatisticaNumeroProcessos[numerosProcessos.first] += ( (numerosProcessos.second / static_cast<double>(quantidades.totalOcorrenciasNumeroProcessos))
-                    * (numerosProcessos.second / static_cast<double>(quantidades.totalOcorrenciasNumeroProcessos)) );
+            this->esperancaQuadradoTemposNumerosProcessos.estatisticaNumeroProcessos[numerosProcessos.first] += ( (numerosProcessos.second / static_cast<double>(quantidades.tempoSimulacao))
+                    * (numerosProcessos.second / quantidades.tempoSimulacao) );
         }
     }
 
@@ -62,7 +63,7 @@ void Estatisticas::calculaMediaAmostralTempoSistemaQtdProcessos(const Metricas& 
 
             this->densidadeTempos.push_back(this->mediaTemposNumerosProcessos.estatisticaTemposSistema.at(tempos));
 
-            esperancaQuadrado.estatisticaTemposSistema[tempos] /= this->amostras.size();
+            this->esperancaQuadradoTemposNumerosProcessos.estatisticaTemposSistema[tempos] /= this->amostras.size();
         }
 
         for (const auto& numeros : this->numerosProcessos)
@@ -71,7 +72,7 @@ void Estatisticas::calculaMediaAmostralTempoSistemaQtdProcessos(const Metricas& 
 
             this->densidadeNumeros.push_back(this->mediaTemposNumerosProcessos.estatisticaNumeroProcessos.at(numeros));
 
-            esperancaQuadrado.estatisticaNumeroProcessos[numeros] /= this->amostras.size();
+            this->esperancaQuadradoTemposNumerosProcessos.estatisticaNumeroProcessos[numeros] /= this->amostras.size();
         }
     }    
 }
@@ -125,7 +126,7 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     double esperancaQuadradoFilaSistema = 0.0;
     double esperancaQuadradoTempoMedioSistema = 0.0;
     double esperancaQuadradoTempoMedioFila = 0.0;
-    struct EstatisticaTemposSistema esperancaQuadradoTemposNumerosProcessos; // Guarda E(X^2) de todas as ocorrências
+    
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
@@ -142,8 +143,6 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
         this->numeroMedioFilaSistema += amostra.retornaNumeroMedioFilaSistema();
         this->tempoMedioSistema += amostra.retornaTempoMedioSistema();
         this->tempoMedioFila += amostra.retornaTempoMedioFila();
-
-        calculaMediaAmostralTempoSistemaQtdProcessos(amostra, esperancaQuadradoTemposNumerosProcessos, true);
 
         #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
@@ -177,7 +176,9 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     esperancaQuadradoTempoMedioSistema /= this->amostras.size();
     esperancaQuadradoTempoMedioFila /= this->amostras.size();
 
-    calculaMediaAmostralTempoSistemaQtdProcessos(this->amostras.back(), esperancaQuadradoTemposNumerosProcessos, false);
+    struct ContagensTemposSistema anon;
+
+    calculaMediaAmostralTempoSistemaQtdProcessos(anon, false);
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
@@ -443,10 +444,50 @@ std::unordered_map<std::string, struct EstatisticaTemposSistema> Estatisticas::r
     return this->intervalosConfiancasTemposNumerosProcessos;
 }
 
+const std::vector<double>& Estatisticas::retornaTemposSistema() const
+{
+    return this->temposSistema;
+}
+
+const std::vector<double>& Estatisticas::retornaNumerosProcessos() const
+{
+    return this->numerosProcessos;
+}
+
+const std::vector<double>& Estatisticas::retornaDensidadeTempos() const
+{
+    return this->densidadeTempos;
+}
+
+const std::vector<double>& Estatisticas::retornaDensidadeNumeros() const
+{
+    return this->densidadeNumeros;
+}
+
+const std::vector<double>& Estatisticas::retornaDensidadeTemposInferior() const
+{
+    return this->densidadeTemposInferior;
+}
+
+const std::vector<double>& Estatisticas::retornaDensidadeNumerosInferior() const
+{
+    return this->densidadeNumerosInferior;
+}
+
+const std::vector<double>& Estatisticas::retornaDensidadeTemposSuperior() const
+{
+    return this->densidadeTemposSuperior;
+}
+
+const std::vector<double>& Estatisticas::retornaDensidadeNumerosSuperior() const
+{
+    return this->densidadeNumerosSuperior;
+}
+
 void Estatisticas::imprimeDadosTemposNumsProcessos(const struct EstatisticaTemposSistema& dados, const std::string& tipoDado)
 {
     for (const auto& num : this->numerosProcessos)
-        std::cout << tipoDado << " amostral de " << num << " processos: " << dados.estatisticaNumeroProcessos.at(num) << std::endl;
+        std::cout << tipoDado << " amostral da probabilidade de " << num << " processos: " << dados.estatisticaNumeroProcessos.at(num) << std::endl;
         
 
     std::cout << std::endl;

@@ -7,26 +7,26 @@ namespace plt = matplotlibcpp;
 
 void plotaCDFTemposDeSistemaNumerosProcessos(const Estatisticas& estatisticas)
 {
-    std::vector<double> funcaoAcumuladaTempos(estatisticas.densidadeTempos.size()),
-                    funcaoAcumuladaNumeros(estatisticas.densidadeNumeros.size()),
-                    funcaoAcumuladaTemposInferior(estatisticas.densidadeTemposInferior.size()),
-                    funcaoAcumuladaNumerosInferior(estatisticas.densidadeNumerosInferior.size()),
-                    funcaoAcumuladaTemposSuperior(estatisticas.densidadeTemposSuperior.size()),
-                    funcaoAcumuladaNumerosSuperior(estatisticas.densidadeNumerosSuperior.size());
+    std::vector<double> funcaoAcumuladaTempos(estatisticas.retornaDensidadeTempos().size()),
+                    funcaoAcumuladaNumeros(estatisticas.retornaDensidadeNumeros().size()),
+                    funcaoAcumuladaTemposInferior(estatisticas.retornaDensidadeTemposInferior().size()),
+                    funcaoAcumuladaNumerosInferior(estatisticas.retornaDensidadeNumerosInferior().size()),
+                    funcaoAcumuladaTemposSuperior(estatisticas.retornaDensidadeTemposSuperior().size()),
+                    funcaoAcumuladaNumerosSuperior(estatisticas.retornaDensidadeNumerosSuperior().size());
 
-    std::partial_sum(estatisticas.densidadeTempos.begin(), estatisticas.densidadeTempos.end(), funcaoAcumuladaTempos.begin());
-    std::partial_sum(estatisticas.densidadeNumeros.begin(), estatisticas.densidadeNumeros.end(), funcaoAcumuladaNumeros.begin());
+    std::partial_sum(estatisticas.retornaDensidadeTempos().begin(), estatisticas.retornaDensidadeTempos().end(), funcaoAcumuladaTempos.begin());
+    std::partial_sum(estatisticas.retornaDensidadeNumeros().begin(), estatisticas.retornaDensidadeNumeros().end(), funcaoAcumuladaNumeros.begin());
 
-    std::partial_sum(estatisticas.densidadeTemposInferior.begin(), estatisticas.densidadeTemposInferior.end(), funcaoAcumuladaTemposInferior.begin());
-    std::partial_sum(estatisticas.densidadeNumerosInferior.begin(), estatisticas.densidadeNumerosInferior.end(), funcaoAcumuladaNumerosInferior.begin());
+    std::partial_sum(estatisticas.retornaDensidadeTemposInferior().begin(), estatisticas.retornaDensidadeTemposInferior().end(), funcaoAcumuladaTemposInferior.begin());
+    std::partial_sum(estatisticas.retornaDensidadeNumerosInferior().begin(), estatisticas.retornaDensidadeNumerosInferior().end(), funcaoAcumuladaNumerosInferior.begin());
 
-    std::partial_sum(estatisticas.densidadeTemposSuperior.begin(), estatisticas.densidadeTemposSuperior.end(), funcaoAcumuladaTemposSuperior.begin());
-    std::partial_sum(estatisticas.densidadeNumerosSuperior.begin(), estatisticas.densidadeNumerosSuperior.end(), funcaoAcumuladaNumerosSuperior.begin());
+    std::partial_sum(estatisticas.retornaDensidadeTemposSuperior().begin(),estatisticas.retornaDensidadeTemposSuperior().end(), funcaoAcumuladaTemposSuperior.begin());
+    std::partial_sum(estatisticas.retornaDensidadeNumerosSuperior().begin(), estatisticas.retornaDensidadeNumerosSuperior().end(), funcaoAcumuladaNumerosSuperior.begin());
     
     
-    plt::plot(estatisticas.temposSistema, funcaoAcumuladaTempos ,{{"label" , "CDF simulada"}});
-    plt::plot(estatisticas.temposSistema, funcaoAcumuladaTemposInferior, {{"label" , "CDF simulada do limite inferior"}});
-    plt::plot(estatisticas.temposSistema, funcaoAcumuladaTemposSuperior, {{"label" , "CDF simulada do limite superior"}});
+    plt::plot(estatisticas.retornaTemposSistema(), funcaoAcumuladaTempos ,{{"label" , "CDF simulada"}});
+    plt::plot(estatisticas.retornaTemposSistema(), funcaoAcumuladaTemposInferior, {{"label" , "CDF simulada do limite inferior"}});
+    plt::plot(estatisticas.retornaTemposSistema(), funcaoAcumuladaTemposSuperior, {{"label" , "CDF simulada do limite superior"}});
 
     plt::xlabel("Tempo de sistema");
     plt::ylabel("Probabilidade de ocorrência do tempo de sistema");
@@ -37,9 +37,9 @@ void plotaCDFTemposDeSistemaNumerosProcessos(const Estatisticas& estatisticas)
     
     plt::show();
     
-    plt::plot(estatisticas.numerosProcessos, funcaoAcumuladaNumeros, {{"drawstyle", "steps-post"}, {"label" , "CDF simulada"}});
-    plt::plot(estatisticas.numerosProcessos, funcaoAcumuladaNumerosInferior, {{"drawstyle", "steps-post"}, {"label" , "CDF simulada do limite inferior"}});
-    plt::plot(estatisticas.numerosProcessos, funcaoAcumuladaNumerosSuperior, {{"drawstyle", "steps-post"}, {"label" , "CDF simulada do limite superior"}});
+    plt::plot(estatisticas.retornaNumerosProcessos(), funcaoAcumuladaNumeros, {{"drawstyle", "steps-post"}, {"label" , "CDF simulada"}});
+    plt::plot(estatisticas.retornaNumerosProcessos(), funcaoAcumuladaNumerosInferior, {{"drawstyle", "steps-post"}, {"label" , "CDF simulada do limite inferior"}});
+    plt::plot(estatisticas.retornaNumerosProcessos(), funcaoAcumuladaNumerosSuperior, {{"drawstyle", "steps-post"}, {"label" , "CDF simulada do limite superior"}});
 
 
     plt::xlabel("Número de processos na fila");

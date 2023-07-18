@@ -2,7 +2,7 @@
 
 Metricas::Metricas(double numeroMedioProcessosSistema, double numeroMedioFilaSistema,
                         double tempoMedioSistema, double tempoMedioFila, double periodoOcupadoGeneralizadoMedio,
-                        double tempoMedioUmCliente, struct ContagensTemposSistema contagens)
+                        double tempoMedioUmCliente)
 {
     this->numeroMedioProcessosSistema = numeroMedioProcessosSistema;
     this->numeroMedioFilaSistema = numeroMedioFilaSistema;
@@ -10,7 +10,6 @@ Metricas::Metricas(double numeroMedioProcessosSistema, double numeroMedioFilaSis
     this->tempoMedioFila = tempoMedioFila;
     this->periodoOcupadoGeneralizadoMedio = periodoOcupadoGeneralizadoMedio;
     this->tempoMedioUmCliente = tempoMedioUmCliente;
-    this->relacoesQuantidadesTemposNumerosProcessos = contagens;
 }
 
 double Metricas::retornaNumeroMedioProcessosSistema() const

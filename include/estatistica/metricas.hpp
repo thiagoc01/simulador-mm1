@@ -8,9 +8,9 @@
 struct ContagensTemposSistema 
 {
     std::unordered_map<double, int> contagensTemposSistema;
-    std::unordered_map<int, int> contagensNumeroProcessos;
+    std::unordered_map<int, double> contagemTemposQtdProcessos;
     int totalOcorrenciasTemposSistema;
-    int totalOcorrenciasNumeroProcessos;
+    double tempoSimulacao;
 };
 
 /* Guarda as métricas de uma rodada do simulador. Ou seja, é um elemento da amostra. */
@@ -32,7 +32,7 @@ class Metricas
 
         Metricas(double numeroMedioProcessosSistema, double numeroMedioFilaSistema,
                         double tempoMedioSistema, double tempoMedioFila, double periodoOcupadoGeneralizadoMedio,
-                        double tempoMedioUmCliente, struct ContagensTemposSistema contagens);
+                        double tempoMedioUmCliente);
 
         double retornaNumeroMedioProcessosSistema() const;
 
