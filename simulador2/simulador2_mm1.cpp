@@ -123,7 +123,7 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     int aux = 0, aux2 = 0;
     for (auto& s: parametros.temposSistema)
     {
-        contagens[s]++;
+        contagens[std::ceil(s * 10e2) / 10e2]++;
 
         //if (contagens.at(s) == 1)
         //    copia.push_back(s);

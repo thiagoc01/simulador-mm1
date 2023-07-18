@@ -7,8 +7,8 @@ struct ContagensTemposSistema
 {
     std::unordered_map<double, int> contagensTemposSistema;
     std::unordered_map<int, int> contagensNumeroProcessos;
-    int totalOcorrenciasTemposSistema = 0;
-    int totalOcorrenciasNumeroProcessos = 0;
+    int totalOcorrenciasTemposSistema;
+    int totalOcorrenciasNumeroProcessos;
 };
 
 /* Guarda as métricas de uma rodada do simulador. Ou seja, é um elemento da amostra. */

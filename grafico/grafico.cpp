@@ -90,4 +90,49 @@ void plotaGrafico(const Estatisticas &estatisticas)
     realizaAcoesPlotagem(temposMediosUmCliente, estatisticas.retornaTempoMedioUmCliente(), legendas);
 
     #endif
+
+
+    std::vector<double> funcaoAcumuladaTempos(estatisticas.densidadeTempos.size()),
+                    funcaoAcumuladaNumeros(estatisticas.densidadeNumeros.size()),
+                    funcaoAcumuladaTemposInferior(estatisticas.densidadeTemposInferior.size()),
+                    funcaoAcumuladaNumerosInferior(estatisticas.densidadeNumerosInferior.size()),
+                    funcaoAcumuladaTemposSuperior(estatisticas.densidadeTemposSuperior.size()),
+                    funcaoAcumuladaNumerosSuperior(estatisticas.densidadeNumerosSuperior.size());
+
+    std::partial_sum(estatisticas.densidadeTempos.begin(), estatisticas.densidadeTempos.end(), funcaoAcumuladaTempos.begin());
+    std::partial_sum(estatisticas.densidadeNumeros.begin(), estatisticas.densidadeNumeros.end(), funcaoAcumuladaNumeros.begin());
+
+    std::partial_sum(estatisticas.densidadeTemposInferior.begin(), estatisticas.densidadeTemposInferior.end(), funcaoAcumuladaTemposInferior.begin());
+    std::partial_sum(estatisticas.densidadeNumerosInferior.begin(), estatisticas.densidadeNumerosInferior.end(), funcaoAcumuladaNumerosInferior.begin());
+
+    std::partial_sum(estatisticas.densidadeTemposSuperior.begin(), estatisticas.densidadeTemposSuperior.end(), funcaoAcumuladaTemposSuperior.begin());
+    std::partial_sum(estatisticas.densidadeNumerosSuperior.begin(), estatisticas.densidadeNumerosSuperior.end(), funcaoAcumuladaNumerosSuperior.begin());
+    
+    
+    plt::plot(estatisticas.temposSistema, funcaoAcumuladaTempos ,{{"label" , "CDF simulada"}});
+    plt::plot(estatisticas.temposSistema, funcaoAcumuladaTemposInferior, {{"label" , "CDF simulada do limite inferior"}});
+    plt::plot(estatisticas.temposSistema, funcaoAcumuladaTemposSuperior, {{"label" , "CDF simulada do limite superior"}});
+
+    plt::xlabel("Tempo de sistema");
+    plt::ylabel("Probabilidade de ocorrência do tempo de sistema");
+
+    plt::title("CDF do tempo de clientes no sistema");
+
+    plt::legend();
+    
+    plt::show();
+    
+    plt::plot(estatisticas.numerosProcessos, funcaoAcumuladaNumeros, {{"drawstyle", "steps-post"}, {"label" , "CDF simulada"}});
+    plt::plot(estatisticas.numerosProcessos, funcaoAcumuladaNumerosInferior, {{"drawstyle", "steps-post"}, {"label" , "CDF simulada do limite inferior"}});
+    plt::plot(estatisticas.numerosProcessos, funcaoAcumuladaNumerosSuperior, {{"drawstyle", "steps-post"}, {"label" , "CDF simulada do limite superior"}});
+
+
+    plt::xlabel("Número de processos na fila");
+    plt::ylabel("Probabilidade de ocorrência");
+
+    plt::title("CDF do número de processos na fila");
+
+    plt::legend();
+
+    plt::show();
 }

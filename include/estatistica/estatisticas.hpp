@@ -29,7 +29,7 @@ class Estatisticas
         double periodoOcupadoGeneralizadoMedio;
         double tempoMedioUmCliente;
         struct EstatisticaTemposSistema mediaTemposNumerosProcessos;
-        std::vector<double> temposSistema, numerosProcessos, densidadeTempos, densidadeNumeros;
+        
 
         double varianciaProcessosSistema;
         double varianciaFilaSistema;
@@ -57,7 +57,14 @@ class Estatisticas
         std::unordered_map<std::string, double> intervaloConfiancaTempoMedioUmCliente;
         std::unordered_map<std::string, struct EstatisticaTemposSistema> intervalosConfiancasTemposNumerosProcessos;
 
+        void imprimeDadosTemposNumsProcessos(const struct EstatisticaTemposSistema& dados, const std::string& tipoDado);
+        void imprimeIntervalosConfiancaTemposNumsProcessos( const std::unordered_map<std::string, struct EstatisticaTemposSistema>& dados);
+
+
+
     public:
+        std::vector<double> temposSistema, numerosProcessos, densidadeTempos, densidadeNumeros;
+        std::vector<double> densidadeTemposInferior, densidadeNumerosInferior, densidadeTemposSuperior, densidadeNumerosSuperior;
         void adicionaAmostra(const Metricas& amostra);
 
         void calculaMediaAmostralTempoSistemaQtdProcessos(const Metricas& amostra,
