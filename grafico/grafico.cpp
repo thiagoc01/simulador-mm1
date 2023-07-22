@@ -79,6 +79,7 @@ void plotaGrafico(const Estatisticas &estatisticas)
     std::vector<double> temposMediosProcessosSistema;
     std::vector<double> temposMediosProcessosFila;
     std::vector<double> temposMediosUmCliente;
+    std::vector<double> probabilidadeMediaExtincao;
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
@@ -94,6 +95,7 @@ void plotaGrafico(const Estatisticas &estatisticas)
         numerosMediosProcessosFila.push_back(amostra.retornaNumeroMedioFilaSistema());
         temposMediosProcessosSistema.push_back(amostra.retornaTempoMedioSistema());
         temposMediosProcessosFila.push_back(amostra.retornaTempoMedioFila());
+        probabilidadeMediaExtincao.push_back(amostra.retornaProbabilidadeExtincao());
 
         #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
@@ -137,6 +139,11 @@ void plotaGrafico(const Estatisticas &estatisticas)
     realizaAcoesPlotagem(temposMediosUmCliente, estatisticas.retornaTempoMedioUmCliente(), legendas);
 
     #endif
+
+    legendas[0] = "Probabilidade média de extinção";
+    legendas[2] = "Histograma da probabilidade média de extinção";
+
+    realizaAcoesPlotagem(probabilidadeMediaExtincao, estatisticas.retornaProbabilidadeMediaExtincao(), legendas);
 
     plotaCDFTemposDeSistemaNumerosProcessos(estatisticas);
 }

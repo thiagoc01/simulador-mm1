@@ -31,6 +31,7 @@ class Estatisticas
         double tempoMedioFila;
         double periodoOcupadoGeneralizadoMedio;
         double tempoMedioUmCliente;
+        double probabilidadeMediaExtincao;
         struct EstatisticaTemposSistema mediaTemposNumerosProcessos; // Média das probabilidades dos tempos de sistema e números de processos
         
 
@@ -40,6 +41,7 @@ class Estatisticas
         double varianciaTempoFila;
         double varianciaPeriodoOcupadoGeneralizadoMedio;
         double varianciaTempoMedioUmCliente;
+        double varianciaProbabilidadeExtincao;
         struct EstatisticaTemposSistema varianciasTemposNumerosProcessos; // Análogo à média
 
         double desvioPadraoProcessosSistema;
@@ -48,6 +50,7 @@ class Estatisticas
         double desvioPadraoTempoFila;
         double desvioPadraoPeriodoOcupadoGeneralizadoMedio;
         double desvioPadraoTempoMedioUmCliente;
+        double desvioPadraoProbabilidadeExtincao;
         struct EstatisticaTemposSistema desviosPadroesTemposNumerosProcessos; // Análogo à média
         
         /* As strings são "inferior" e "superior" para acessarmos os valores. */
@@ -58,6 +61,7 @@ class Estatisticas
         std::unordered_map<std::string, double> intervaloConfiancaTempoFila;
         std::unordered_map<std::string, double> intervaloConfiancaPeriodoOcupadoGeneralizadoMedio;
         std::unordered_map<std::string, double> intervaloConfiancaTempoMedioUmCliente;
+        std::unordered_map<std::string, double> intervaloConfiancaProbabilidadeExtincao;
         std::unordered_map<std::string, struct EstatisticaTemposSistema> intervalosConfiancasTemposNumerosProcessos; // Análogo à média
 
         void imprimeDadosTemposNumsProcessos(const struct EstatisticaTemposSistema& dados, const std::string& tipoDado);
@@ -84,6 +88,8 @@ class Estatisticas
         double retornaTempoMedioFila() const;
 
         double retornaPeriodoOcupadoGeneralizadoMedio() const;
+
+        double retornaProbabilidadeMediaExtincao() const;
 
         double retornaTempoMedioUmCliente() const;
 

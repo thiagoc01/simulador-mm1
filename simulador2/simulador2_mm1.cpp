@@ -15,6 +15,7 @@
 
 extern int numClientes; // Definido em main.cpp
 namespace plt = matplotlibcpp;
+
 struct ComparadorTemposRequisicao // Utilizado para ser a função de comparação na fila, já que queremos o menor tempo sempre.
 {
     bool operator()(Requisicao& r1, Requisicao& r2)
@@ -30,6 +31,13 @@ static double (*geraTempoServicoProbabilistico)(double taxaServico) = [](double 
 
 static std::mutex mutexEstatisticas; // Mutex para acesso concorrente das threads ao objeto estatisticas
 
+typedef struct Processo // Informações de um nó na árvore da fila M/M/1 de um processo de ramificação
+{
+    bool finalizado = false;
+    std::vector<int> filhos;
+    int pai, id;
+};
+
 /* 
     Todas as variáveis que são utilizadas no simulador. Por serem muitas a serem passadas como argumento,
     a criação de uma estrutura para guardar as referências é mais viável.
@@ -44,12 +52,13 @@ typedef struct
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
-    double& inicioClientes; // Guarda o tempo de início do período ocupado generalizado atual
+    double& inicioClientes; // Guarda o tempo de início do período ocupado generalizado parametros.atual
 
     #endif
 
     int& numPessoasFila;
     int& numPessoasSistema;
+    
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
@@ -63,6 +72,11 @@ typedef struct
     std::vector<double>& temposSaida; // Análogo ao anterior para a saída
     std::vector<double>& temposSistema; // Tempo de serviço mais tempo na fila
     std::vector<double>& temposEspera; // Análogo ao anterior, porém somente na fila
+
+    int raiz = 1; // Raiz do período ocupado atual
+    int atual = 1; // Próximo processo a chegar
+    int emAtendimento = 1; // Processo sendo atendido pelo servidor
+    std::unordered_map<int, Processo> infos; // Informações de um processo no período ocupado
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
@@ -103,6 +117,7 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     double tempoMedioSistema;
     double tempoMedioEspera;
     double tempoMedioPeriodoOcupadoGeneralizado;
+    double probabilidadeExtincao;
 
     if (parametros.temposSistema.empty()) // Se o vetor está vazio, considera média 0
         tempoMedioSistema = 0.0;
@@ -134,6 +149,26 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
                     .contagemTemposQtdProcessos = contagensOcorrenciasNumerosProcessos,
                     .totalOcorrenciasTemposSistema = quantidadeTotalTemposGerados,
                     .tempoSimulacao = parametros.tempoSimulacao};
+
+    /* Realiza a contabilização do fim da subárvore. O processo e seus filhos devem ter terminado. */
+
+    int ok = 0;
+
+    for (const auto& info : parametros.infos)
+    {
+        int finalizados = 0;
+
+        for (const auto& filhos : info.second.filhos)
+        {
+            if (parametros.infos.at(filhos).finalizado)
+                finalizados++;
+        }
+
+        if (finalizados == info.second.filhos.size() && info.second.finalizado)
+            ok++;        
+    }
+
+    probabilidadeExtincao = ok / static_cast<double>(parametros.temposChegada.size()); // Finalizados / total de processos
     
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
@@ -146,8 +181,9 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
                     parametros.temposPeriodosOcupadosGeneralizados.end(), 0.0) / parametros.temposPeriodosOcupadosGeneralizados.size();
 
     #endif
+
     
-    #if NUM_THREADS == 1 && TAMANHO_AMOSTRA == 1
+    #if NUM_THREADS == 1 && TAMANHO_AMOSTRA == 1 
 
     double tempoMedioPeriodoOcupadoAnalitico = (1 / taxaServico) / (1 - (taxaChegada / taxaServico));
 
@@ -156,6 +192,7 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     std::cout << "Tempo médio no sistema (E(T)): " << tempoMedioSistema << std::endl; 
     std::cout << "Tempo médio na fila (E(W)): " << tempoMedioEspera << std::endl;
     std::cout << "Comparativo E(T) simulado (Período ocupado) x E(T) analítico: " << tempoMedioSistema << " " << tempoMedioPeriodoOcupadoAnalitico << std::endl;
+    std::cout << "Probabilidade de extinção: " << probabilidadeExtincao << std::endl;
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
@@ -167,7 +204,7 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
 
     
     #endif
-
+   
     std::cout << std::endl;
 
     #endif
@@ -175,7 +212,7 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
     mutexEstatisticas.lock();
 
     estatisticas.adicionaAmostra(Metricas(mediaProcessosSistema, mediaProcessosFila, tempoMedioSistema,
-                       tempoMedioEspera, tempoMedioPeriodoOcupadoGeneralizado, tempoMedioPeriodoOcupadoGeneralizado - tempoMedioSistema));
+                       tempoMedioEspera, tempoMedioPeriodoOcupadoGeneralizado, tempoMedioPeriodoOcupadoGeneralizado - tempoMedioSistema, probabilidadeExtincao));
 
     estatisticas.calculaMediaAmostralTempoSistemaQtdProcessos(quantidades, true);
 
@@ -184,7 +221,7 @@ void calculaMetricas(const std::vector<std::pair<double, int>>& numeroProcessosS
 
 void trataEventoChegada(const Requisicao& cabecaFila, const double& tempoChegada, const double& tempoServico, ParametrosSimulador& parametros)
 {
-    parametros.tempoSimulacao = cabecaFila.retornaTempoRequisicao(); // Atualiza o tempo para esse evento
+    parametros.tempoSimulacao = cabecaFila.retornaTempoRequisicao(); // parametros.atualiza o tempo para esse evento
 
     parametros.temposChegada.push_back(parametros.tempoSimulacao); // Guarda o tempo de chegada
 
@@ -198,6 +235,33 @@ void trataEventoChegada(const Requisicao& cabecaFila, const double& tempoChegada
     std::cout << "Tempo: " << parametros.tempoSimulacao << " - CHEGADA " << parametros.numPessoasSistema << "->" << parametros.numPessoasSistema + 1 << std::endl;
 
     #endif
+
+    /* Uma entrada nova é criada no map. Pra todo ascedente dele, é adicionada uma entrada indicando a descendência. */
+
+    parametros.infos.insert({parametros.atual, Processo()});
+    parametros.infos[parametros.atual].id = parametros.atual;
+
+    if (parametros.numPessoasSistema)
+    {
+        parametros.infos[parametros.atual].pai = parametros.emAtendimento;
+        int aux = parametros.emAtendimento;
+        
+        while (parametros.infos.at(aux).id != parametros.raiz)
+        {
+            parametros.infos.at(aux).filhos.push_back(parametros.atual);
+            aux = parametros.infos.at(aux).pai;
+        }
+        
+       parametros.infos[parametros.raiz].filhos.push_back(parametros.atual);
+    }
+
+    else // É o primeiro processo do período ocupado, ele é a raiz
+    {
+        parametros.emAtendimento = parametros.raiz;
+        parametros.infos[parametros.atual].pai = parametros.raiz;
+    }
+    
+    parametros.atual++;
 
     /* Mais uma pessoa na fila e no sistema */
 
@@ -231,12 +295,17 @@ void trataEventoChegada(const Requisicao& cabecaFila, const double& tempoChegada
 
 void trataEventoSaida(const Requisicao& cabecaFila, const double& tempoChegada, const double& tempoServico, ParametrosSimulador& parametros)
 {
+    /* Indica o fim do processo em atendimento. */
+
+    parametros.infos[parametros.emAtendimento].finalizado = true;
+    parametros.emAtendimento++;
+
     /* Guarda o tempo que a requisição aguardou. Análogo ao simulador 1. */
 
     if (parametros.ultimoServico != cabecaFila.retornaTempoRequisicao()) // O tempo de espera para o caso da requisição que chega é atendida já foi calculada
         parametros.temposEspera.push_back(parametros.ultimoServico - parametros.temposChegada[parametros.temposSaida.size()]);
 
-    parametros.tempoSimulacao = cabecaFila.retornaTempoRequisicao(); // Atualiza o tempo para esse evento
+    parametros.tempoSimulacao = cabecaFila.retornaTempoRequisicao(); // parametros.atualiza o tempo para esse evento
 
     parametros.numeroProcessosFilaPeriodo.push_back({parametros.tempoSimulacao - parametros.ultimoEvento, parametros.numPessoasFila});
 
@@ -260,6 +329,9 @@ void trataEventoSaida(const Requisicao& cabecaFila, const double& tempoChegada, 
     #endif
     
     parametros.numPessoasSistema--; // Requisição tratada
+
+    if (parametros.numPessoasSistema == 0) // Foi o último do período ocupado, o próximo será a nova raiz
+        parametros.raiz = parametros.atual;
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
@@ -301,7 +373,6 @@ void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, boo
 
     int numPessoasFila = 0;
     int numPessoasSistema = 0;
-
     bool analisandoFila = false;
 
     std::vector<std::pair<double, int>> numeroProcessosSistemaPeriodo;
@@ -332,7 +403,7 @@ void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, boo
 
         #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
-        .analisandoFila = analisandoFila,
+        .analisandoFila = analisandoFila,        
 
         #endif
 
@@ -374,7 +445,6 @@ void simulaFilaMM1(int numIteracoes, double taxaChegada, double taxaServico, boo
         atualizaSistema(tempoChegada, tempoServico, parametros);
         
     }
-
     /* Calcula as métricas dessa amostra */
 
     calculaMetricas(parametros.numeroProcessosSistemaPeriodo, parametros.numeroProcessosFilaPeriodo, parametros, taxaChegada, taxaServico);

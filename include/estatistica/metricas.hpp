@@ -25,6 +25,7 @@ class Metricas
         double tempoMedioFila;
         double periodoOcupadoGeneralizadoMedio;
         double tempoMedioUmCliente;
+        double probabilidadeExtincao;
         struct ContagensTemposSistema relacoesQuantidadesTemposNumerosProcessos;
         
 
@@ -32,7 +33,7 @@ class Metricas
 
         Metricas(double numeroMedioProcessosSistema, double numeroMedioFilaSistema,
                         double tempoMedioSistema, double tempoMedioFila, double periodoOcupadoGeneralizadoMedio,
-                        double tempoMedioUmCliente);
+                        double tempoMedioUmCliente, double probabilidadeExtincao);
 
         double retornaNumeroMedioProcessosSistema() const;
 
@@ -45,6 +46,8 @@ class Metricas
         double retornaPeriodoOcupadoGeneralizadoMedio() const;
 
         double retornaTempoMedioUmCliente() const;
+
+        double retornaProbabilidadeExtincao() const;
 
         struct ContagensTemposSistema retornaQuantidadesTemposNumsProcessos() const;
 };

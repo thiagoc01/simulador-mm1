@@ -2,7 +2,7 @@
 
 Metricas::Metricas(double numeroMedioProcessosSistema, double numeroMedioFilaSistema,
                         double tempoMedioSistema, double tempoMedioFila, double periodoOcupadoGeneralizadoMedio,
-                        double tempoMedioUmCliente)
+                        double tempoMedioUmCliente, double probabilidadeExtincao)
 {
     this->numeroMedioProcessosSistema = numeroMedioProcessosSistema;
     this->numeroMedioFilaSistema = numeroMedioFilaSistema;
@@ -10,6 +10,7 @@ Metricas::Metricas(double numeroMedioProcessosSistema, double numeroMedioFilaSis
     this->tempoMedioFila = tempoMedioFila;
     this->periodoOcupadoGeneralizadoMedio = periodoOcupadoGeneralizadoMedio;
     this->tempoMedioUmCliente = tempoMedioUmCliente;
+    this->probabilidadeExtincao = probabilidadeExtincao;
 }
 
 double Metricas::retornaNumeroMedioProcessosSistema() const
@@ -40,6 +41,11 @@ double Metricas::retornaPeriodoOcupadoGeneralizadoMedio() const
 double Metricas::retornaTempoMedioUmCliente() const
 {
     return this->tempoMedioUmCliente;
+}
+
+double Metricas::retornaProbabilidadeExtincao() const
+{
+    return this->probabilidadeExtincao;
 }
 
 struct ContagensTemposSistema Metricas::retornaQuantidadesTemposNumsProcessos() const
