@@ -1,5 +1,8 @@
 #include "estatistica/metricas.hpp"
 
+
+#ifdef SIMULADOR_2
+
 Metricas::Metricas(double numeroMedioProcessosSistema, double numeroMedioFilaSistema,
                         double tempoMedioSistema, double tempoMedioFila, double periodoOcupadoGeneralizadoMedio,
                         double tempoMedioUmCliente, double probabilidadeExtincao)
@@ -12,6 +15,19 @@ Metricas::Metricas(double numeroMedioProcessosSistema, double numeroMedioFilaSis
     this->tempoMedioUmCliente = tempoMedioUmCliente;
     this->probabilidadeExtincao = probabilidadeExtincao;
 }
+
+#else
+
+Metricas::Metricas(double numeroMedioProcessosSistema, double numeroMedioFilaSistema,
+                        double tempoMedioSistema, double tempoMedioFila)
+{
+    this->numeroMedioProcessosSistema = numeroMedioProcessosSistema;
+    this->numeroMedioFilaSistema = numeroMedioFilaSistema;
+    this->tempoMedioSistema = tempoMedioSistema;
+    this->tempoMedioFila = tempoMedioFila;
+}
+
+#endif
 
 double Metricas::retornaNumeroMedioProcessosSistema() const
 {

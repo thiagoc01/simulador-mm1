@@ -114,14 +114,14 @@ simulador1_compilacao: main.cpp
 simulador1_compilacao_objs: simulador1/*.cpp
 	$(CXX) -c simulador1/simulador1_mm1.cpp $(FLAGS)
 
-simulador2 : teste_g++ thread.o grafico.o estatisticas geracao_aleatorios simulador2_compilacao_objs simulador2_compilacao clean
+simulador2 : teste_g++ thread.o grafico2 estatisticas2 geracao_aleatorios simulador2_compilacao_objs simulador2_compilacao clean
 	
 simulador2_compilacao: main.cpp
-	$(CXX) $(OBJ2) main.cpp -o $(TARGET) $(FLAGS)
+	$(CXX) $(OBJ2) main.cpp -o $(TARGET) $(FLAGS) -D SIMULADOR_2
 
 simulador2_compilacao_objs: simulador2/*.cpp
-	$(CXX) -c simulador2/simulador2_mm1.cpp $(FLAGS)
-	$(CXX) -c simulador2/requisicao.cpp $(FLAGS)
+	$(CXX) -c simulador2/simulador2_mm1.cpp $(FLAGS) -D SIMULADOR_2
+	$(CXX) -c simulador2/requisicao.cpp $(FLAGS) -D SIMULADOR_2
 
 simulador3 : teste_g++ thread.o grafico.o estatisticas geracao_aleatorios simulador3_compilacao_objs simulador3_compilacao clean
 	
@@ -139,11 +139,17 @@ geracao_aleatorios: geradores_aleatorios/geracao_tempos.cpp
 estatisticas: estatistica/*.cpp
 	$(CXX) -c estatistica/*.cpp $(FLAGS)
 
+estatisticas2: estatistica/*.cpp
+	$(CXX) -c estatistica/*.cpp $(FLAGS) -D SIMULADOR_2
+
 thread.o: thread/thread.cpp
 	$(CXX) -c thread/thread.cpp $(FLAGS)
 
 grafico.o: grafico/grafico.cpp
 	$(CXX) -c grafico/grafico.cpp $(FLAGS)
+
+grafico2: grafico/grafico.cpp
+	$(CXX) -c grafico/grafico.cpp $(FLAGS) -D SIMULADOR_2
 
 clean:
 	rm -f *.o

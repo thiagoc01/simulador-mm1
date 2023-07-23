@@ -95,7 +95,12 @@ void plotaGrafico(const Estatisticas &estatisticas)
         numerosMediosProcessosFila.push_back(amostra.retornaNumeroMedioFilaSistema());
         temposMediosProcessosSistema.push_back(amostra.retornaTempoMedioSistema());
         temposMediosProcessosFila.push_back(amostra.retornaTempoMedioFila());
+
+        #ifdef SIMULADOR_2
+
         probabilidadeMediaExtincao.push_back(amostra.retornaProbabilidadeExtincao());
+
+        #endif
 
         #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
@@ -140,10 +145,14 @@ void plotaGrafico(const Estatisticas &estatisticas)
 
     #endif
 
+    #ifdef SIMULADOR_2
+
     legendas[0] = "Probabilidade média de extinção";
     legendas[2] = "Histograma da probabilidade média de extinção";
 
     realizaAcoesPlotagem(probabilidadeMediaExtincao, estatisticas.retornaProbabilidadeMediaExtincao(), legendas);
 
     plotaCDFTemposDeSistemaNumerosProcessos(estatisticas);
+
+    #endif
 }

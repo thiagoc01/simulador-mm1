@@ -111,8 +111,12 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     this->numeroMedioFilaSistema = 0.0;
     this->tempoMedioSistema = 0.0;
     this->tempoMedioFila = 0.0;
+
+    #ifdef SIMULADOR_2
+
     this->probabilidadeMediaExtincao = 0.0;
 
+    #endif
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
@@ -127,8 +131,12 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     double esperancaQuadradoFilaSistema = 0.0;
     double esperancaQuadradoTempoMedioSistema = 0.0;
     double esperancaQuadradoTempoMedioFila = 0.0;
+
+    #ifdef SIMULADOR_2
+
     double esperancaQuadradoProbabilidadeExtincao = 0.0;
     
+    #endif
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
@@ -145,7 +153,12 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
         this->numeroMedioFilaSistema += amostra.retornaNumeroMedioFilaSistema();
         this->tempoMedioSistema += amostra.retornaTempoMedioSistema();
         this->tempoMedioFila += amostra.retornaTempoMedioFila();
+
+        #ifdef SIMULADOR_2
+
         this->probabilidadeMediaExtincao += amostra.retornaProbabilidadeExtincao();
+
+        #endif
 
         #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
@@ -158,8 +171,12 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
         esperancaQuadradoFilaSistema += (amostra.retornaNumeroMedioFilaSistema() * amostra.retornaNumeroMedioFilaSistema());
         esperancaQuadradoTempoMedioSistema += (amostra.retornaTempoMedioSistema() * amostra.retornaTempoMedioSistema());
         esperancaQuadradoTempoMedioFila += (amostra.retornaTempoMedioFila() * amostra.retornaTempoMedioFila());
+
+        #ifdef SIMULADOR_2
+
         esperancaQuadradoProbabilidadeExtincao += (amostra.retornaProbabilidadeExtincao() * amostra.retornaProbabilidadeExtincao());
 
+        #endif
 
         #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
@@ -175,17 +192,27 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     this->numeroMedioFilaSistema /= this->amostras.size();
     this->tempoMedioSistema /= this->amostras.size();
     this->tempoMedioFila /= this->amostras.size();
+
+    #ifdef SIMULADOR_2
+
     this->probabilidadeMediaExtincao /= this->amostras.size();
     
+    #endif
+
     esperancaQuadradoProcessosSistema /= this->amostras.size();
     esperancaQuadradoFilaSistema /= this->amostras.size();
     esperancaQuadradoTempoMedioSistema /= this->amostras.size();
     esperancaQuadradoTempoMedioFila /= this->amostras.size();
+
+    #ifdef SIMULADOR_2
+
     esperancaQuadradoProbabilidadeExtincao /= this->amostras.size();
 
     struct ContagensTemposSistema anon;
 
     calculaMediaAmostralTempoSistemaQtdProcessos(anon, false);
+
+    #endif
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
@@ -203,8 +230,12 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     this->varianciaFilaSistema = esperancaQuadradoFilaSistema - (this->numeroMedioFilaSistema * this->numeroMedioFilaSistema);
     this->varianciaTempoSistema = esperancaQuadradoTempoMedioSistema - (this->tempoMedioSistema * this->tempoMedioSistema);
     this->varianciaTempoFila = esperancaQuadradoTempoMedioFila - (this->tempoMedioFila * this->tempoMedioFila);
+
+    #ifdef SIMULADOR_2
+
     this->varianciaProbabilidadeExtincao = esperancaQuadradoProbabilidadeExtincao - (this->probabilidadeMediaExtincao * this->probabilidadeMediaExtincao);
 
+    #endif
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
@@ -217,9 +248,14 @@ void Estatisticas::calculaVarianciasDesviosPadroesAmostrais()
     this->desvioPadraoFilaSistema = std::sqrt(this->varianciaFilaSistema);
     this->desvioPadraoTempoSistema = std::sqrt(this->varianciaTempoSistema);
     this->desvioPadraoTempoFila = std::sqrt(this->varianciaTempoFila);
+
+    #ifdef SIMULADOR_2
+
     this->desvioPadraoProbabilidadeExtincao = std::sqrt(this->varianciaProbabilidadeExtincao);
 
     calculaVarianciaDesvioPadraoTemposNumerosProcessos(esperancaQuadradoTemposNumerosProcessos);
+
+    #endif
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
@@ -303,8 +339,12 @@ void Estatisticas::calculaIntervalosConfianca(const double& probabilidadeTaxaCon
     calculaLimitesTemposNumerosProcessos(this->intervalosConfiancasTemposNumerosProcessos, probabilidadeTaxaConfianca,
                     this->mediaTemposNumerosProcessos, this->desviosPadroesTemposNumerosProcessos, tamanhoAmostral);
 
+    #ifdef SIMULADOR_2
+
     calculaLimites(this->intervaloConfiancaProbabilidadeExtincao, probabilidadeTaxaConfianca, this->probabilidadeMediaExtincao,
                     this->desvioPadraoProbabilidadeExtincao, tamanhoAmostral);
+
+    #endif
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 
@@ -539,11 +579,16 @@ void Estatisticas::imprimeAnaliseAmostral(const double& taxaChegada, const doubl
     std::cout << "Média amostral de processos na fila (E(N_q)): " << this->retornaNumeroMedioFilaSistema() << std::endl;     
     std::cout << "Média amostral de tempo no sistema (E(T)): " << this->retornaTempoMedioSistema() << std::endl; 
     std::cout << "Média amostral de tempo na fila (E(W)): " << this->retornaTempoMedioFila() << std::endl;
+
+    #ifdef SIMULADOR_2
+
     std::cout << "Probabilidade média extinção: " << probabilidadeMediaExtincao << std::endl;
 
     imprimeDadosTemposNumsProcessos(this->mediaTemposNumerosProcessos, "Média");
 
     std::cout << "\nComparativo E(T) amostral simulado x E(T) analítico: " << this->retornaTempoMedioSistema() << " " << tempoMedioPeriodoOcupadoAnalitico << std::endl;
+
+    #endif
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
@@ -558,9 +603,14 @@ void Estatisticas::imprimeAnaliseAmostral(const double& taxaChegada, const doubl
     std::cout << "Variância amostral de processos na fila (E(N_q)): " << this->retornaVarianciaFilaSistema() << std::endl;     
     std::cout << "Variância amostral de tempo no sistema (E(T)): " << this->retornaVarianciaTempoSistema() << std::endl; 
     std::cout << "Variância amostral de tempo na fila (E(W)): " << this->retornaVarianciaTempoFila() << std::endl;
+
+    #ifdef SIMULADOR_2
+
     std::cout << "Variância amostral da probabilidade de extinção: " << this->varianciaProbabilidadeExtincao << std::endl;
 
     imprimeDadosTemposNumsProcessos(this->varianciasTemposNumerosProcessos, "Variância");
+
+    #endif
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
@@ -574,9 +624,14 @@ void Estatisticas::imprimeAnaliseAmostral(const double& taxaChegada, const doubl
     std::cout << "Desvio padrão amostral de processos na fila (E(N_q)): " << this->retornaDesvioPadraoFilaSistema() << std::endl;     
     std::cout << "Desvio padrão amostral de tempo no sistema (E(T)): " << this->retornaDesvioPadraoTempoSistema() << std::endl; 
     std::cout << "Desvio padrão amostral de tempo na fila (E(W)): " << this->retornaDesvioPadraoTempoFila() << std::endl;
+
+    #ifdef SIMULADOR_2
+
     std::cout << "Desvio padrão amostral da probabilidade de extinção: " << this->desvioPadraoProbabilidadeExtincao << std::endl;
 
     imprimeDadosTemposNumsProcessos( this->desviosPadroesTemposNumerosProcessos, "Desvio padrão");
+
+    #endif
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
     
@@ -604,9 +659,13 @@ void Estatisticas::imprimeAnaliseAmostral(const double& taxaChegada, const doubl
 
     intervalo = this->intervaloConfiancaProbabilidadeExtincao;
 
+    #ifdef SIMULADOR_2
+
     std::cout << "Intervalo de confiança da probabilidade de extinção: [" << intervalo["inferior"] << ", " << intervalo["superior"]<< "]" << std::endl;
 
     imprimeIntervalosConfiancaTemposNumsProcessos(this->intervalosConfiancasTemposNumerosProcessos);
+
+    #endif
 
     #ifdef CALCULAR_PERIODO_OCUPADO_GENERALIZADO
 

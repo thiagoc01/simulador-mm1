@@ -31,10 +31,20 @@ class Metricas
 
     public:
 
+        #ifdef SIMULADOR_2
+
         Metricas(double numeroMedioProcessosSistema, double numeroMedioFilaSistema,
                         double tempoMedioSistema, double tempoMedioFila, double periodoOcupadoGeneralizadoMedio,
                         double tempoMedioUmCliente, double probabilidadeExtincao);
 
+        #else
+
+        Metricas(double numeroMedioProcessosSistema, double numeroMedioFilaSistema,
+                        double tempoMedioSistema, double tempoMedioFila);
+
+
+        #endif
+        
         double retornaNumeroMedioProcessosSistema() const;
 
         double retornaNumeroMedioFilaSistema() const;
