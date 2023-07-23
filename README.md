@@ -1,8 +1,8 @@
-# Simuladores de fila MM1 | Trabalho 1 | Modelagem e Avaliação de Desempenho 2023.1
+# Simuladores de fila M/M/1 | Modelagem e Avaliação de Desempenho 2023.1
 
 <br>
 
-Esse repositório contém o código de três simuladores que simulam uma fila MM1 de três formas diferentes. O objetivo é mostrar que eles são equivalentes.
+Esse repositório contém o código de três simuladores que simulam uma fila M/M/1 de três formas diferentes. O objetivo é mostrar que eles são equivalentes.
 
 <br>
 
@@ -17,12 +17,13 @@ Esse repositório contém o código de três simuladores que simulam uma fila MM
 
 # Como funciona?
 
-Cada simulador recebe três parâmetros: a taxa de chegada $\lambda$, a taxa de serviço $\mu$ e o número de iterações/requisições (simulador 3) desejada. E um parâmetro opcional D, que indica se o tempo de serviço é determínistico ou não. O simulador é rodado n vezes, onde n é o tamanho da amostra. Em cada iteração, são gerados os tempos de chegada e serviço de um processo, ambos via distribuição exponencial com médias $\frac{1}{\lambda}$ e $\frac{1}{\mu}$, respectivamente. Ao fim, são exibidas estatísticas da amostra e gráficos para quatro métricas:
+Cada simulador recebe três parâmetros: a taxa de chegada $\lambda$, a taxa de serviço $\mu$ e o número de iterações/requisições (simulador 3) desejada. E um parâmetro opcional D, que indica se o tempo de serviço é determínistico ou não. O simulador é rodado n vezes, onde n é o tamanho da amostra. Em cada iteração, são gerados os tempos de chegada e serviço de um processo, ambos via distribuição exponencial com médias $\frac{1}{\lambda}$ e $\frac{1}{\mu}$, respectivamente. Ao fim, são exibidas estatísticas da amostra e gráficos para cinco métricas:
 
 - E($N$): Número médio de processos no sistema;
 - E($N_q$): Número médio de processos na fila;
 - E($T$): Tempo médio de processos no sistema;
 - E($W$): Tempo médio de processos na fila;
+- Probabilidade de extinção.
 
 Se o tamanho da amostra for 1, as estatísticas não são exibidas, porém os eventos de uma execução que serão, assim como as métricas daquela execução.
 
